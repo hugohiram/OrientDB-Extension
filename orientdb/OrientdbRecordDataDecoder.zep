@@ -102,7 +102,6 @@ class OrientdbRecordDataDecoder
 		array_push(this->element, self::PROPERTY);
 
 		while (this->index <= contentLength) {
-			//let cChar = sTransformation[this->index];
 			let cChar = substr(sTransformation, this->index, 1);
 
 			if (end(this->element) == self::PROPERTY) {
@@ -117,67 +116,48 @@ class OrientdbRecordDataDecoder
 				if (end(this->element) == self::VALUE) {
 					let content = substr(sTransformation, this->position);
 
-					if (cChar == "[") {
-						// list
-						let this->position = this->index + 1;
-						let buffer = this->decodeList(content);
-						this->buildJson(buffer);
-					}
-					else {
-						if (cChar == "{") {
-							// map
-							let this->position = this->index + 1;
-							let buffer = this->decodeMap(content);
-							this->buildJson(buffer);
-						}
-						else {
-							if (cChar == "(") {
+					switch cChar {
+						case "[":
+								// list
+								let this->position = this->index + 1;
+								let buffer = this->decodeList(content);
+								break;
+						case "{":
+								// map
+								let this->position = this->index + 1;
+								let buffer = this->decodeMap(content);
+								break;
+						case "(":
 								// emdedded, emdeddedset
 								let this->position = this->index + 1;
 								let buffer = this->decodeEmbedded(content);
-								this->buildJson(buffer);
-							}
-							else {
-								if (cChar == "\"") {
-									// string
-									let buffer = this->decodeString(content);
-									this->buildJson(buffer);
+								break;
+						case "\"":
+								// string
+								let buffer = this->decodeString(content);
+								break;
+						case "#":
+								// link
+								let buffer = this->decodeLink(content);
+								break;
+						case "t":
+						case "f":
+								// boolean
+								let buffer = this->decodeBoolean(content);
+								break;
+						default:
+								if (is_numeric(cChar)) {
+									// numeric
+									let buffer = this->decodeNumericSimple(content);
 								}
 								else {
-									if (cChar == "#") {
-										// link
-										let buffer = this->decodeLink(content);
-										this->buildJson(buffer);
-									}
-									else {
-										if (cChar == "t" || cChar == "f") {
-											// boolean
-											let buffer = this->decodeBoolean(content);
-											this->buildJson(buffer);
-										}
-										else {
-											if (is_numeric(cChar)) {
-												// numeric
-												let buffer = this->decodeNumericSimple(content);
-												this->buildJson(buffer);
-											}
-											else {
-												if (cChar == ",") {
-													// empty
-													this->buildJson("null");
-												}
-												else {
-													// empty
-													this->buildJson("null");
-												}
-											}
-										}
-									}
+									// empty
+									let buffer = "null";
 								}
-							}
-						}
+								break;
 					}
 
+					this->buildJson(buffer);
 					array_pop(this->element);
 
 					if (this->index + 1 < contentLength) {
