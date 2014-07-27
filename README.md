@@ -26,7 +26,7 @@ Haven't tried in a PHP 5.3.x installation.
 ## clone and build ##
 
     git clone https://github.com/hugohiram/OrientDB-Extension
-    cd OrientDB-Extension/orientdb
+    cd OrientDB-Extension
     sudo su
     zephir build
     service apache2 restart
