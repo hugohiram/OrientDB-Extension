@@ -19,8 +19,6 @@ namespace Orientdb;
  */
 class DBClose extends OperationAbstract
 {
-	const OPERATION = 5; //REQUEST_DB_CLOSE
-	const STATUS_SUCCESS = 0x00;
 
 	/**
 	 * Orientdb\DBClose constructor
@@ -33,7 +31,7 @@ class DBClose extends OperationAbstract
 		let this->parent = parent;
 		let this->socket = parent->socket;
 		let this->transaction = -1;
-		//let this->operation = "REQUEST_DB_OPEN";
+		let this->operation = OperationAbstract::REQUEST_DB_OPEN;
 	}
 
 	/**
@@ -58,7 +56,7 @@ class DBClose extends OperationAbstract
 	protected function prepare(parameters) -> void
 	{
 		this->resetRequest();
-		this->addByte(chr(self::OPERATION));
+		this->addByte(chr(this->operation));
 	}
 
 	/**

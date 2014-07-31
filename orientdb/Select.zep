@@ -23,10 +23,6 @@ class Select extends OperationAbstract
 	//const OPERATION = 3;
 	//const COMMAND = 2;
 
-	const STATUS_SUCCESS = 0x00;
-	const STATUS_ERROR = 0x01;
-
-	const OPERATION = 41; //REQUEST_COMMAND
 	const MODE = "s"; //synchronous mode
 	const CLASSNAME = "com.orientechnologies.orient.core.sql.query.OSQLSynchQuery";
 
@@ -42,8 +38,7 @@ class Select extends OperationAbstract
 		let this->socket = parent->socket;
 
 		//this->mode = self::COMMAND;
-		//this->implementation = self::IMPLEMETANTION;
-		//this->operation = "REQUEST_COMMAND";
+		let this->operation = OperationAbstract::REQUEST_COMMAND;
 	}
 
 	/**
@@ -72,7 +67,7 @@ class Select extends OperationAbstract
 		let query = parameters[0];
 		let fetchplan = isset(parameters[1]) ? parameters[1] : "*:0";
 
-		this->addByte(chr(self::OPERATION));
+		this->addByte(chr(this->operation));
 
 		let this->transaction = this->parent->getSessionDB();
 		this->addInt(this->transaction);
@@ -104,8 +99,7 @@ class Select extends OperationAbstract
 
 		let status = this->readByte(this->socket);
 		
-		if (status == (chr(self::STATUS_SUCCESS))) {
-			echo "STATUS_SUCCESS";
+		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 			let transaction = this->readInt(this->socket);
 			let status = this->readByte(this->socket);
 			if (status == "l") {

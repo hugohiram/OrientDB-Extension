@@ -19,8 +19,6 @@ namespace Orientdb;
  */
 class DBOpen extends OperationAbstract
 {
-	const OPERATION   = 3;
-	const STATUS_SUCCESS = 0x00;
 
 	/**
 	 * Orientdb\DBOpen constructor
@@ -33,7 +31,7 @@ class DBOpen extends OperationAbstract
 		let this->parent = parent;
 		let this->socket = parent->socket;
 		let this->transaction = -1;
-		//let this->operation = "REQUEST_DB_OPEN";
+		let this->operation = OperationAbstract::REQUEST_DB_OPEN;
 	}
 
 	/**
@@ -58,7 +56,7 @@ class DBOpen extends OperationAbstract
 	protected function prepare(parameters) -> void
 	{
 		this->resetRequest();
-		this->addByte(chr(self::OPERATION));
+		this->addByte(chr(this->operation));
 
 		this->addInt(this->transaction);
 
@@ -93,7 +91,7 @@ class DBOpen extends OperationAbstract
 		let status = this->readByte(this->socket);
 		let transaction = this->readInt(this->socket);
 
-		if (status == (chr(self::STATUS_SUCCESS))) {
+		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 			let session = this->readInt(this->socket);
 			this->parent->setSessionDB(session);
 			let numClusters = this->readShort(this->socket);
