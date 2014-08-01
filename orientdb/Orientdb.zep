@@ -25,10 +25,14 @@ class Orientdb
 	const STATUS_SUCCESS = 0x00;
 	const STATUS_ERROR = 0x01;
 
+	const SERIALIZATION_CSV		= "ORecordDocument2csv";
+	const SERIALIZATION_BINARY	= "ORecordSerializerBinary";
+
 	public driverName = "PHP-Extension";
 	public driverVersion = "0.1";
 	public protocolVersion = 15;
 	public clientId = null;
+	public serialization;
 
 	protected sessionDB;
 	protected sessionServer;
@@ -43,10 +47,11 @@ class Orientdb
 	/**
 	 * Orientdb\Orientdb constructor
 	 *
-	 * @param string host Hostname or IP of the OrientDB Server
-	 * @param int    port Port number of the OrientDB Server, 2424 by default
+	 * @param string host          Hostname or IP of the OrientDB Server
+	 * @param int    port          Port number of the OrientDB Server, 2424 by default
+	 * @param string serialization type of serialization implementation, "csv" by default
 	 */
-	public function __construct(string host, int port = 2424)
+	public function __construct(string host, int port = 2424, string serialization = "csv")
 	{
 		let this->error = false;
 
@@ -60,35 +65,14 @@ class Orientdb
 			let this->errstr = 500;
 			throw new Exception(this->errno, this->errstr);
 		}
-	}
 
-	private function run(className, parameters = null)
-	{
-		/*
-		//var_dump(parameters);
-		var resourceClass;
-		let resourceClass = new {className}(this);
-		//resourceClass->run(func_get_args());
-		//let classx = new DBOpen(this);
-		echo className;
-		//var_dump(func_get_args());
-		*/
-	}
-
-	public function Generic()
-	{
-		/*
-		//this->run(__FUNCTION__, func_get_args());
-		var resourceClass;
-		let resourceClass = new DBOpen(this);
-
-		//var className;
-		//let className = __FUNCTION__;
-		//let resourceClass = new {className}(this);
-		//resourceClass->run(func_get_args());
-
-		call_user_func_array([resourceClass, "run"], func_get_args());
-		*/
+		switch serialization {
+			case "binary": // only CSV supported
+			case "csv":
+			default:
+				let this->serialization = self::SERIALIZATION_CSV;
+				break;
+		}
 	}
 
 	/**
@@ -100,7 +84,7 @@ class Orientdb
 	{
 		var resourceClass;
 		let resourceClass = new DBOpen(this);
-		
+
 		return call_user_func_array([resourceClass, "run"], func_get_args());
 	}
 

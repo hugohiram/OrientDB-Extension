@@ -57,13 +57,13 @@ class DBOpen extends OperationAbstract
 	{
 		this->resetRequest();
 		this->addByte(chr(this->operation));
-
 		this->addInt(this->transaction);
 
 		this->addString(this->parent->driverName);
 		this->addString(this->parent->driverVersion);
 		this->addShort(this->parent->protocolVersion);
 		this->addString(this->parent->clientId);
+		//this->addString(this->parent->serialization);
 
 		this->addString(parameters[0]);
 		this->addString(parameters[1]);
