@@ -75,6 +75,23 @@ class Orientdb
 		}
 	}
 
+	/////////////////////////////////////////
+	//     Server (CONNECT Operations)     //
+	/////////////////////////////////////////
+
+	/**
+	 * Database Open method
+	 *
+	 * @return array
+	 */
+	public function Connect()
+	{
+		var resourceClass;
+		let resourceClass = new Connect(this);
+
+		return call_user_func_array([resourceClass, "run"], func_get_args());
+	}
+
 	/**
 	 * Database Open method
 	 *
@@ -87,6 +104,10 @@ class Orientdb
 
 		return call_user_func_array([resourceClass, "run"], func_get_args());
 	}
+
+	/////////////////////////////////////////
+	//    Database (DB_OPEN Operations)    //
+	/////////////////////////////////////////
 
 	/**
 	 * Database Open method
