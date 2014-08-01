@@ -89,6 +89,19 @@ class Orientdb
 	}
 
 	/**
+	 * Database Open method
+	 *
+	 * @return array
+	 */
+	public function DBClose()
+	{
+		var resourceClass;
+		let resourceClass = new DBClose(this);
+
+		return call_user_func_array([resourceClass, "run"], func_get_args());
+	}
+
+	/**
 	 * Select method
 	 *
 	 * @return array
