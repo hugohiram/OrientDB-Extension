@@ -21,6 +21,10 @@ use Exception;
  */
 class DBCreate extends OperationAbstract
 {
+	protected _dbName;
+	protected _dbType;
+	protected _storage;
+
 
 	/**
 	 * Orientdb\DBOpen constructor
@@ -39,11 +43,18 @@ class DBCreate extends OperationAbstract
 	/**
 	 * Main method to run the operation
 	 * 
+	 * @param string dbName      Name of the new database
+	 * @param string dbType      Type of the new database: document|graph, "document" by default
+	 * @param string storageType Storage type of the new database: plocal|memory, "plocal" by default
 	 * @return string
 	 */
-	public function run() -> string
+	public function run(string dbName, string dbType = "document", string storageType = "plocal") -> string
 	{
-		this->prepare(func_get_args());
+		let this->_dbName = dbName;
+		let this->_dbType = dbType;
+		let this->_storage = storageType;
+
+		this->prepare();
 		this->execute();
 		let this->response = this->parseResponse();
 
@@ -53,26 +64,27 @@ class DBCreate extends OperationAbstract
 	/**
 	 * Prepare the parameters
 	 * 
-	 * @param array parameters Array of parameters
+	 * @return void
 	 */
-	protected function prepare(parameters) -> void
+	protected function prepare() -> void
 	{
 		this->resetRequest();
-		this->addByte(chr(this->operation));
-
 		let this->transaction = this->parent->getSessionServer();
+		this->addByte(chr(this->operation));
 		this->addInt(this->transaction);
 
 		// database name
-		this->addString(parameters[0]);
+		this->addString(this->_dbName);
 		// database type
-		this->addString(parameters[1]);
+		this->addString(this->_dbType);
 		// storage type
-		this->addString(parameters[2]);
+		this->addString(this->_storage);
 	}
 
 	/**
 	 * Parse the response from the socket
+	 * 
+	 * @return void
 	 */
 	protected function parseResponse() -> void
 	{

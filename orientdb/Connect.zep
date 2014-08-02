@@ -20,6 +20,8 @@ use Exception;
  */
 class Connect extends OperationAbstract
 {
+	protected _serverUser;
+	protected _serverPass;
 
 	/**
 	 * Orientdb\DBOpen constructor
@@ -38,11 +40,16 @@ class Connect extends OperationAbstract
 	/**
 	 * Main method to run the operation
 	 * 
+	 * @param string serverUser Username to connect to the OrientDB server
+	 * @param string serverPass Password to connect to the OrientDB server
 	 * @return string
 	 */
-	public function run() -> string
+	public function run(string serverUser, string serverPass) -> string
 	{
-		this->prepare(func_get_args());
+		let this->_serverUser = serverUser;
+		let this->_serverPass = serverPass;
+
+		this->prepare();
 		this->execute();
 		let this->response = this->parseResponse();
 
@@ -52,9 +59,9 @@ class Connect extends OperationAbstract
 	/**
 	 * Prepare the parameters
 	 * 
-	 * @param array parameters Array of parameters
+	 * @return void
 	 */
-	protected function prepare(parameters) -> void
+	protected function prepare() -> void
 	{
 		this->resetRequest();
 		this->addByte(chr(this->operation));
@@ -66,12 +73,16 @@ class Connect extends OperationAbstract
 		this->addString(this->parent->clientId);
 		//this->addString(this->parent->serialization);
 
-		this->addString(parameters[0]);
-		this->addString(parameters[1]);
+		// server's username
+		this->addString(this->_serverUser);
+		// server's password
+		this->addString(this->_serverPass);
 	}
 
 	/**
 	 * Parse the response from the socket
+	 * 
+	 * @return void
 	 */
 	protected function parseResponse() -> void
 	{

@@ -19,6 +19,10 @@ namespace Orientdb;
  */
 class DBOpen extends OperationAbstract
 {
+	protected _dbName;
+	protected _dbType;
+	protected _dbUser;
+	protected _dbPass;
 
 	/**
 	 * Orientdb\DBOpen constructor
@@ -36,12 +40,21 @@ class DBOpen extends OperationAbstract
 
 	/**
 	 * Main method to run the operation
-	 * 
+	 *
+	 * @param string dbName Name of the database to open
+	 * @param string dbType Type of the database: document|graph
+	 * @param string dbUser Username for the database
+	 * @param string dbPass Password of the user
 	 * @return string
 	 */
-	public function run() -> string
+	public function run(string dbName, string dbType, string dbUser, string dbPass) -> string
 	{
-		this->prepare(func_get_args());
+		let this->_dbName = dbName;
+		let this->_dbType = dbType;
+		let this->_dbUser = dbUser;
+		let this->_dbPass = dbPass;
+
+		this->prepare();
 		this->execute();
 		let this->response = this->parseResponse();
 
@@ -51,9 +64,9 @@ class DBOpen extends OperationAbstract
 	/**
 	 * Prepare the parameters
 	 * 
-	 * @param array parameters Array of parameters
+	 * @return void
 	 */
-	protected function prepare(parameters) -> void
+	protected function prepare() -> void
 	{
 		this->resetRequest();
 		this->addByte(chr(this->operation));
@@ -65,10 +78,14 @@ class DBOpen extends OperationAbstract
 		this->addString(this->parent->clientId);
 		//this->addString(this->parent->serialization);
 
-		this->addString(parameters[0]);
-		this->addString(parameters[1]);
-		this->addString(parameters[2]);
-		this->addString(parameters[3]);
+		// db name
+		this->addString(this->_dbName);
+		// db type
+		this->addString(this->_dbType);
+		// db user
+		this->addString(this->_dbUser);
+		// db pass
+		this->addString(this->_dbPass);
 	}
 
 	/**

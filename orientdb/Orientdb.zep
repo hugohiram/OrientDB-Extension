@@ -82,40 +82,49 @@ class Orientdb
 	/**
 	 * Database Connect method
 	 *
+	 * @param string serverUser Username to connect to the OrientDB server
+	 * @param string serverPass Password to connect to the OrientDB server
 	 * @return array
 	 */
-	public function Connect()
+	public function Connect(string serverUser, string serverPass)
 	{
 		var resourceClass;
 		let resourceClass = new Connect(this);
 
-		return call_user_func_array([resourceClass, "run"], func_get_args());
+		return resourceClass->run(serverUser, serverPass);
 	}
 
 	/**
 	 * Database Open method
 	 *
+	 * @param string dbName Name of the database to open
+	 * @param string dbType Type of the database: document|graph
+	 * @param string dbUser Username for the database
+	 * @param string dbPass Password of the user
 	 * @return array
 	 */
-	public function DBOpen()
+	public function DBOpen(string dbName, string dbType, string dbUser, string dbPass)
 	{
 		var resourceClass;
 		let resourceClass = new DBOpen(this);
 
-		return call_user_func_array([resourceClass, "run"], func_get_args());
+		return resourceClass->run(dbName, dbType, dbUser, dbPass);
 	}
 
 	/**
 	 * Create database method
 	 *
+	 * @param string dbName      Name of the new database
+	 * @param string dbType      Type of the new database: document|graph, "document" by default
+	 * @param string storageType Storage type of the new database: plocal|memory, "plocal" by default
 	 * @return array
 	 */
-	public function DBCreate()
+	public function DBCreate(string dbName, string dbType = "document", string storageType = "plocal")
 	{
 		var resourceClass;
 		let resourceClass = new DBCreate(this);
 
-		return call_user_func_array([resourceClass, "run"], func_get_args());
+		return resourceClass->run(dbName, dbType, storageType);
 	}
 
 	/////////////////////////////////////////
@@ -132,22 +141,28 @@ class Orientdb
 		var resourceClass;
 		let resourceClass = new DBClose(this);
 
-		return call_user_func_array([resourceClass, "run"], func_get_args());
+		return resourceClass->run();
 	}
 
 	/**
 	 * Select method
 	 *
+	 * @param string dbName Name of the database to open
+	 * @param string dbType Type of the database: document|graph
 	 * @return array
 	 */
-	public function select()
+	public function select(string query, string fetchplan = "*:0")
 	{
 		var resourceClass;
 		let resourceClass = new Select(this);
-		
-		return call_user_func_array([resourceClass, "run"], func_get_args());
+
+		return resourceClass->run(query, fetchplan);
 	}
 
+
+	/////////////////////////////////////////
+	//       Orientdb custom methods       //
+	/////////////////////////////////////////
 
 	/**
 	 * Set session of DB

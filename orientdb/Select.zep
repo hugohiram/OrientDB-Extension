@@ -23,6 +23,9 @@ class Select extends OperationAbstract
 	//const OPERATION = 3;
 	//const COMMAND = 2;
 
+	protected _query;
+	protected _fetchplan;
+
 	const MODE = "s"; //synchronous mode
 	const CLASSNAME = "com.orientechnologies.orient.core.sql.query.OSQLSynchQuery";
 
@@ -44,11 +47,15 @@ class Select extends OperationAbstract
 	/**
 	 * Main method to run the operation
 	 * 
+	 * @param string query Query to execute
 	 * @return string
 	 */
-	public function run()
+	public function run(string query, string fetchplan = "*:0")
 	{
-		this->prepare(func_get_args());
+		let this->_query = query;
+		let this->_fetchplan = fetchplan;
+
+		this->prepare();
 		this->execute();
 		let this->response = this->parseResponse();
 
@@ -58,31 +65,26 @@ class Select extends OperationAbstract
 	/**
 	 * Prepare the parameters
 	 * 
-	 * @param array parameters Array of parameters
+	 * @return void
 	 */
-	protected function prepare(parameters) -> void
+	protected function prepare() -> void
 	{
-		string fetchplan;
-		var query, commandPayload;
-		let query = parameters[0];
-		let fetchplan = isset(parameters[1]) ? parameters[1] : "*:0";
-
-		this->addByte(chr(this->operation));
+		var commandPayload;
 
 		let this->transaction = this->parent->getSessionDB();
+		this->addByte(chr(this->operation));
 		this->addInt(this->transaction);
 
 		this->addByte(self::MODE);
 
 		let commandPayload = "";
 		let commandPayload .= this->addBytes(self::CLASSNAME, false);
-		let commandPayload .= this->addBytes(trim(query), false);
+		let commandPayload .= this->addBytes(trim(this->_query), false);
 		let commandPayload .= pack("N", -1);
-		let commandPayload .= this->addBytes(fetchplan, false);
+		let commandPayload .= this->addBytes(this->_fetchplan, false);
 		let commandPayload .= pack("N", 0);
 
 		this->addString(commandPayload);
-		//var_dump(this->requestMessage);
 	}
 
 	/**

@@ -41,7 +41,7 @@ class DBClose extends OperationAbstract
 	 */
 	public function run()
 	{
-		this->prepare(func_get_args());
+		this->prepare();
 		this->execute();
 		let this->response = this->parseResponse();
 
@@ -53,7 +53,7 @@ class DBClose extends OperationAbstract
 	 * 
 	 * @param array parameters Array of parameters
 	 */
-	protected function prepare(parameters) -> void
+	protected function prepare() -> void
 	{
 		this->resetRequest();
 		this->addByte(chr(this->operation));
