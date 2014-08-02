@@ -80,7 +80,7 @@ class Orientdb
 	/////////////////////////////////////////
 
 	/**
-	 * Database Open method
+	 * Database Connect method
 	 *
 	 * @return array
 	 */
@@ -105,12 +105,25 @@ class Orientdb
 		return call_user_func_array([resourceClass, "run"], func_get_args());
 	}
 
+	/**
+	 * Create database method
+	 *
+	 * @return array
+	 */
+	public function DBCreate()
+	{
+		var resourceClass;
+		let resourceClass = new DBCreate(this);
+
+		return call_user_func_array([resourceClass, "run"], func_get_args());
+	}
+
 	/////////////////////////////////////////
 	//    Database (DB_OPEN Operations)    //
 	/////////////////////////////////////////
 
 	/**
-	 * Database Open method
+	 * Database Close method
 	 *
 	 * @return array
 	 */
