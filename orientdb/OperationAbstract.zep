@@ -52,7 +52,7 @@ class OperationAbstract
 
 	// Status
 	const STATUS_SUCCESS = 0x00;
-	const STATUS_ERROR = 0x01;
+	const STATUS_ERROR   = 0x01;
 
 	// Status
 	const EXCEPTION_EMPTY = 0x00;
@@ -79,25 +79,10 @@ class OperationAbstract
 		let this->socket = parent->socket;
 	}
 
-
-//	public function run()
-//	{
-//		this->prepare(func_get_args());
-//		this->execute();
-//		let this->response = this->parseResponse();
-
-//		return this->response;
-//	}
-
-//	protected function prepare()
-//	{
-//		this->resetRequest();
-//
-//		this->addByte(chr(constant("self::this->operation")));
-//	}
-
 	/**
 	 * Execute the operation, sends the data to the socket
+	 *
+	 * @return void
 	 */
 	protected function execute() -> void
 	{
@@ -106,6 +91,8 @@ class OperationAbstract
 
 	/**
 	 * Reset the request property
+	 *
+	 * @return void
 	 */
 	public function resetRequest() -> void
 	{
