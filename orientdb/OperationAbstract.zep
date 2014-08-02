@@ -10,6 +10,8 @@
 
 namespace Orientdb;
 
+use Exception;
+
 /**
  * OperationAbstract() for OrientDB
  *
@@ -51,6 +53,10 @@ class OperationAbstract
 	// Status
 	const STATUS_SUCCESS = 0x00;
 	const STATUS_ERROR = 0x01;
+
+	// Status
+	const EXCEPTION_EMPTY = 0x00;
+	const EXCEPTION_FOUND = 0x01;
 
 	// Variables
 	protected parent;
@@ -357,4 +363,26 @@ class OperationAbstract
 		*/
 	}
 
+	/**
+	 * Get exception class and exception message from socket and throws new exception
+	 *
+	 * @return void
+	 */
+	protected function handleException() -> void
+	{
+		// [(1)(exception-class:string)(exception-message:string)]*(0)(serialized-exception:bytes)
+		var exceptionStatus;
+		let exceptionStatus = this->readByte(this->socket);
+		if (exceptionStatus == (chr(self::EXCEPTION_FOUND))) {
+			var exceptionClass;
+			var exceptionMessage;
+			let exceptionClass = this->readString(this->socket);
+			let exceptionMessage = this->readString(this->socket);
+
+			throw new Exception(exceptionMessage, 400);
+			//let exceptionStatus = this->readByte(this->socket);
+			//if (exceptionStatus == (chr(OperationAbstract::EXCEPTION_FOUND))) {
+			//}
+		}
+	}
 }
