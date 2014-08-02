@@ -10,6 +10,7 @@
 
 namespace Orientdb;
 
+use Exception;
 /**
  * Connect() Operation for OrientDB
  *
@@ -74,10 +75,7 @@ class Connect extends OperationAbstract
 	 */
 	protected function parseResponse() -> void
 	{
-		var protocol;
-		var status;
-		var transaction;
-		var session;
+		var protocol, status, session, transaction;
 
 		let protocol = this->readShort(this->socket);
 		let status = this->readByte(this->socket);
@@ -88,11 +86,12 @@ class Connect extends OperationAbstract
 			this->parent->setSessionServer(session);
 		}
 		else {
-			// [(1)(exception-class:string)(exception-message:string)]*(0)(serialized-exception:bytes)
-			var exceptionClass;
-			//var exceptionClass, exceptionMessage;
-			let exceptionClass = this->readString(this->socket);
-			//let exceptionMessage = this->readString(this->socket);
+			if (status == (chr(OperationAbstract::STATUS_ERROR))) {
+				this->handleException();
+			}
+			else {
+				throw new Exception("unknown error", 400);
+			}
 		}
 	}
 }
