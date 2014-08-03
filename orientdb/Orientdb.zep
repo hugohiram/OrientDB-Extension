@@ -144,6 +144,22 @@ class Orientdb
 		return resourceClass->run(dbName, dbType, storageType);
 	}
 
+	/**
+	 * Check if database exists method
+	 *
+	 * @param string dbName Name of the database to check
+	 * @return array
+	 */
+	public function DBExist(string dbName)
+	{
+		this->canPerformServerOperation();
+
+		var resourceClass;
+		let resourceClass = new DBExist(this);
+
+		return resourceClass->run(dbName);
+	}
+
 	/////////////////////////////////////////
 	//    Database (DB_OPEN Operations)    //
 	/////////////////////////////////////////

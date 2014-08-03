@@ -38,12 +38,12 @@ Haven't tried in a PHP 5.3.x installation.
 * DBOpen (REQUEST_DB_OPEN)
 * DBCreate (REQUEST_DB_CREATE)
 * DBClose (REQUEST_DB_CLOSE)
+* DBExist (REQUEST_DB_EXIST)
 * Select (SynchQuery)
 
 ## TODOs ##
 
 * Autoloader
-* REQUEST_DB_EXIST
 * REQUEST_DB_DROP
 * REQUEST_CONFIG_GET
 * REQUEST_CONFIG_SET
@@ -119,6 +119,12 @@ Haven't tried in a PHP 5.3.x installation.
 
     $orient = new Orientdb\Orientdb('localhost', 2424);
     $orient->DBClose();
+
+### DBExist ###
+##### (REQUEST_DB_EXIST) #####
+
+    $orient = new Orientdb\Orientdb('localhost', 2424);
+    $exists = $orient->DBExist('test');	
 
 ### Select ###
 ##### (Select) #####
