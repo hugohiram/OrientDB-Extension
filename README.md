@@ -33,12 +33,60 @@ Haven't tried in a PHP 5.3.x installation.
 
 ## Done ##
 
-* Connect
-* DBOpen
-* DBClose
+* Shutdown (REQUEST_SHUTDOWN)
+* Connect (REQUEST_CONNECT)
+* DBOpen (REQUEST_DB_OPEN)
+* DBCreate (REQUEST_DB_CREATE)
+* DBClose (REQUEST_DB_CLOSE)
 * Select (SynchQuery)
 
 ## TODOs ##
 
 * Autoloader
 * Everything
+
+## Usage ##
+
+### Shutdown ###
+##### (REQUEST_SHUTDOWN) #####
+
+    $orient = new Orientdb\Orientdb('localhost', 2424);
+    $orient->Shutdown('admin', 'admin');
+
+### Connect ###
+##### (REQUEST_CONNECT) #####
+
+    $orient = new Orientdb\Orientdb('localhost', 2424);
+    $orient->Connect('admin', 'admin');
+
+### DBOpen ###
+##### (REQUEST_DB_OPEN) #####
+
+    $orient = new Orientdb\Orientdb('localhost', 2424);
+    $orient->DBOpen('test', 'document', 'admin', 'admin');
+
+### DBCreate ###
+##### (REQUEST_DB_CREATE) #####
+
+    $orient = new Orientdb\Orientdb('localhost', 2424);
+    $orient->Connect('admin', 'admin');
+    $orient->DBCreate('test', 'document', 'plocal');
+
+### DBClose ###
+##### (REQUEST_DB_CLOSE) #####
+
+    $orient = new Orientdb\Orientdb('localhost', 2424);
+    $orient->DBClose();
+
+### Select ###
+##### (Select) #####
+
+    $orient = new Orientdb\Orientdb('localhost', 2424);
+    $orient->DBOpen('test', 'document', 'admin', 'admin');
+    $records = $orient->select('select from basic');
+    if (!empty($records)) {
+		foreach ($records as $record) {
+		    $data = $record->data;
+			var_dump($data);
+		}
+	}
