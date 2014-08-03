@@ -66,6 +66,8 @@ class DBClose extends OperationAbstract
 	 */
 	protected function parseResponse()
 	{
+		this->parent->setSessionDB(null);
+
 		return true;
 	}
 }

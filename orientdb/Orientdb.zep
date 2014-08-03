@@ -136,6 +136,8 @@ class Orientdb
 	 */
 	public function DBCreate(string dbName, string dbType = "document", string storageType = "plocal")
 	{
+		this->canPerformServerOperation();
+
 		var resourceClass;
 		let resourceClass = new DBCreate(this);
 
@@ -153,6 +155,8 @@ class Orientdb
 	 */
 	public function DBClose()
 	{
+		this->canPerformDatabaseOperation();
+
 		var resourceClass;
 		let resourceClass = new DBClose(this);
 
@@ -168,6 +172,8 @@ class Orientdb
 	 */
 	public function select(string query, string fetchplan = "*:0")
 	{
+		this->canPerformDatabaseOperation();
+
 		var resourceClass;
 		let resourceClass = new Select(this);
 
@@ -228,5 +234,33 @@ class Orientdb
 	public function autoload(className)
 	{
 		echo className;
+	}
+
+	/**
+	 * Check if there is a session created for DB, if not, throw an exception
+	 *
+	 * @return void
+	 */
+	private function canPerformDatabaseOperation() -> void
+	{
+		var transaction;
+		let transaction = this->getSessionDB();
+		if empty transaction {
+			throw new Exception("Cannot perform this action if not connected to a database");
+		}
+	}
+
+	/**
+	 * Check if there is a session created for Server, if not, throw an exception
+	 *
+	 * @return void
+	 */
+	private function canPerformServerOperation() -> void
+	{
+		var transaction;
+		let transaction = this->getSessionServer();
+		if empty transaction {
+			throw new Exception("Cannot perform this action if not connected to a server");
+		}
 	}
 }
