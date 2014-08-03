@@ -246,7 +246,7 @@ class Orientdb
 		var transaction;
 		let transaction = this->getSessionDB();
 		if empty transaction {
-			throw new Exception("Cannot perform this action if not connected to a database");
+			throw new Exception("Cannot perform the '" . this->GetCallingMethodName() . "' operation if not connected to a database");
 		}
 	}
 
@@ -260,7 +260,20 @@ class Orientdb
 		var transaction;
 		let transaction = this->getSessionServer();
 		if empty transaction {
-			throw new Exception("Cannot perform this action if not connected to a server");
+			throw new Exception("Cannot perform the '" . this->GetCallingMethodName() . "' operation if not connected to a server");
 		}
+	}
+
+	/**
+	 * Get the calling method for current method
+	 *
+	 * @return string
+	 */
+	private function GetCallingMethodName() -> string
+	{
+		var trace;
+		let trace = debug_backtrace();
+
+		return trace[2]["function"];
 	}
 }
