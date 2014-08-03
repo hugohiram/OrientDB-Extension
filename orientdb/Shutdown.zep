@@ -83,16 +83,13 @@ class Shutdown extends OperationAbstract
 		var status, session;
 
 		let status = this->readByte(this->socket);
-		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
-			var_dump("STATUS_SUCCESS");
+		if (status == (chr(OperationAbstract::STATUS_ERROR))) {
+			let session = this->readInt(this->socket);
+			this->parent->setSessionServer(session);
+			this->handleException();
 		}
 		else {
-			if (status == (chr(OperationAbstract::STATUS_ERROR))) {
-				let session = this->readInt(this->socket);
-				this->parent->setSessionServer(session);
-				this->handleException();
-			}
-			else {
+			if (status != (chr(OperationAbstract::STATUS_SUCCESS))) {
 				throw new Exception("unknown error", 400);
 			}
 		}
