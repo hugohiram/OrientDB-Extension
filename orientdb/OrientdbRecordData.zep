@@ -63,7 +63,7 @@ class OrientdbRecordData
 			this->_decode();
 		}
 
-		if (isset(this->data->{name})) {
+		if isset this->data->{name} {
 			return this->data->{name};
 		}
 
