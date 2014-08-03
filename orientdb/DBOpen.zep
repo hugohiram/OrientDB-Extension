@@ -10,6 +10,8 @@
 
 namespace Orientdb;
 
+Use Exception;
+
 /**
  * DBOpen() Operation for OrientDB
  *
@@ -90,8 +92,10 @@ class DBOpen extends OperationAbstract
 
 	/**
 	 * Parse the response from the socket
+	 * 
+	 * @return array
 	 */
-	protected function parseResponse() -> void
+	protected function parseResponse() -> array
 	{
 		var protocol;
 		var status;
@@ -127,6 +131,23 @@ class DBOpen extends OperationAbstract
 
 			let config = this->readBytes(this->socket);
 			let release = this->readString(this->socket);
+
+			return ["numClusters":numClusters, "clusters":clusters, "config":config, "release":release];
 		}
+		else {
+			if (status == (chr(OperationAbstract::STATUS_ERROR))) {
+				let session = this->readInt(this->socket);
+				this->parent->setSessionServer(session);
+
+				this->handleException();
+
+				throw new Exception("Could not open database, maybe it doesn't exist, try the DBExist operation", 400);
+			}
+			else {
+				throw new Exception("unknown error", 400);
+			}
+		}
+
+		return [];
 	}
 }
