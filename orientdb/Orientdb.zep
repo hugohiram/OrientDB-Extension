@@ -80,6 +80,21 @@ class Orientdb
 	/////////////////////////////////////////
 
 	/**
+	 * Database Shutdown method
+	 *
+	 * @param string serverUser Username to connect to the OrientDB server
+	 * @param string serverPass Password to connect to the OrientDB server
+	 * @return array
+	 */
+	public function Shutdown(string serverUser, string serverPass)
+	{
+		var resourceClass;
+		let resourceClass = new Shutdown(this);
+
+		return resourceClass->run(serverUser, serverPass);
+	}
+
+	/**
 	 * Database Connect method
 	 *
 	 * @param string serverUser Username to connect to the OrientDB server
