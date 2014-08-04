@@ -40,6 +40,7 @@ Haven't tried in a PHP 5.3.x installation.
 * DBClose (REQUEST_DB_CLOSE)
 * DBExist (REQUEST_DB_EXIST)
 * DBDrop (REQUEST_DB_DROP)
+* DBList (REQUEST_DB_LIST)
 * Select (SynchQuery)
 
 ## TODOs ##
@@ -48,7 +49,6 @@ Haven't tried in a PHP 5.3.x installation.
 * REQUEST_CONFIG_GET
 * REQUEST_CONFIG_SET
 * REQUEST_CONFIG_LIST
-* REQUEST_DB_LIST
 * REQUEST_DB_SIZE
 * REQUEST_DB_COUNTRECORDS
 * REQUEST_DATACLUSTER_ADD
@@ -134,6 +134,14 @@ Haven't tried in a PHP 5.3.x installation.
     $orient = new Orientdb\Orientdb('localhost', 2424);
     $orient->Connect('admin', 'admin');
     $orient->DBDrop('test', 'plocal');	
+
+
+### DBList ###
+##### (REQUEST_DB_LIST) #####
+
+    $orient = new Orientdb\Orientdb('localhost', 2424);
+    $orient->Connect('admin', 'admin');
+    $databases = $orient->DBList();	
 
 ### Select ###
 ##### (Command) #####

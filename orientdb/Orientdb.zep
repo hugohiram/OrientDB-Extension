@@ -161,6 +161,21 @@ class Orientdb
 	}
 
 	/**
+	 * Retrieve list of databases
+	 *
+	 * @return array
+	 */
+	public function DBList()
+	{
+		this->canPerformServerOperation();
+
+		var resourceClass;
+		let resourceClass = new DBList(this);
+
+		return resourceClass->run();
+	}
+
+	/**
 	 * drop database if exists
 	 *
 	 * @param string dbName Name of the database to drop
