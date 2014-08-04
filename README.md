@@ -99,7 +99,7 @@ Parameter  | Description
 ---------- | -------------
 **_host_** | IP or Host of the OrientDB Server
 **_port_** | Port used on the OrientDB Server
-**_serialization_** | Serialization used: csv | binary, only csv supported at the moment
+**_serialization_** | Serialization used: csv/binary, only csv supported at the moment
 
 #### Example
 ```php
@@ -153,11 +153,11 @@ DBOpen(string dbName, string dbType, string dbUser, string dbPass) : array
 ```
 #### Parameters
 Parameter  | Description
----------- | -------------
-**_dbName_** - Name of the database
-**_dbType_** - Type of the database: document | graph, only document is supported at the moment
-**_dbUser_** - Username for the database
-**_dbPass_** - Password for the database
+------------ | -------------
+**_dbName_** | Name of the database
+**_dbType_** | Type of the database: document/graph, only document is supported at the moment
+**_dbUser_** | for the database
+**_dbPass_** | Password for the database
 
 #### Example
 ```php
@@ -176,8 +176,8 @@ DBCreate(string dbName [, string dbType = "document" [, string storageType = "pl
 Parameter  | Description
 ---------- | -------------
 **_dbName_** | Name of the database
-**_dbType_** | Type of the database: document | graph, _document_ by default, only document is supported at the moment
-**_storageType_** | Storage type: plocal | memory, _plocal_ by default
+**_dbType_** | Type of the database: document/graph, _document_ by default, only document is supported at the moment
+**_storageType_** | Storage type: plocal/memory, _plocal_ by default
 
 #### Example
 ```php
@@ -233,7 +233,7 @@ DBDrop(string dbName [, string dbType = "plocal" ] ) : void
 Parameter  | Description
 ---------- | -------------
 **_dbName_** | Name of the database to delete
-**_dbType_** | Type of the database: plocal | memory, _plocal_ by default
+**_dbType_** | Type of the database: plocal/memory, _plocal_ by default
 
 #### Example
 ```php
