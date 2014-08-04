@@ -94,47 +94,49 @@ class Select extends OperationAbstract
 	 */
 	protected function parseResponse()
 	{
-		var status;
-		var transaction;
-		var recordsCount;
-		var records;
+		var status, session;
+		var recordsCount, records, resultType;
 
 		let status = this->readByte(this->socket);
+		let session = this->readInt(this->socket);
+		this->parent->setSessionDB(session);
 		
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
-			let transaction = this->readInt(this->socket);
-			let status = this->readByte(this->socket);
-			if (status == "l") {
-				// List of records
-				let recordsCount = this->readInt(this->socket);
-				if (recordsCount == 0) {
-                    return false;
-                }
-                let records = [];
-                var pos;
-				for pos in range(1, recordsCount) {
-                    let records[] = this->readRecord();
-                }
-                return records;
+			let resultType = this->readByte(this->socket);
+			switch resultType {
+				case "l":
+					// List of records
+					let recordsCount = this->readInt(this->socket);
+					if (recordsCount == 0) {
+						return false;
+					}
+
+					let records = [];
+					var pos;
+					for pos in range(1, recordsCount) {
+						let records[] = this->readRecord();
+					}
+
+					return records;
+
+				case "r":
+					// Single record
+					return [this->readRecord()];
+
+				case "n":
+					// Null
+					return null;
+
+				case "a":
+					// Something other
+					return this->readString(this->socket);
+
+				default:
+					break;
 			}
-			else {
-				if (status == "n") {
-	                // Null
-	                return null;
-            	}
-            	else {
-            		if (status == "r") {
-                		// Single record
-                		return this->readRecord();
-            		}
-            		else {
-            			if (status == "a") {
-                			// Something other
-                			return this->readString(this->socket);
-                		}
-                	}
-                }
-            }
+		}
+		else {
+			this->handleException();
 		}
 	}
 
