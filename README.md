@@ -96,7 +96,9 @@ Orientdb ( string host [, int port = 2424 [, string serialization = "csv" ]] ) :
 ```
 #### Parameters
 **host** - IP or Host of the OrientDB Server
+
 **port** - Port used on the OrientDB Server
+
 **serialization** - Serialization used: csv | binary, only csv supported at the moment
 
 #### Example
@@ -113,6 +115,7 @@ Shutdown(string username, string password) : void
 ```
 #### Parameters
 **username** - Username for the OrientDB Server
+
 **password** - Password for the OrientDB Server
 
 #### Example
@@ -130,6 +133,7 @@ Shutdown(string username, string password) : void
 ```
 #### Parameters
 **username** - Username for the OrientDB Server
+
 **password** - Password for the OrientDB Server
 
 #### Example
@@ -147,8 +151,11 @@ DBOpen(string dbName, string dbType, string dbUser, string dbPass) : array
 ```
 #### Parameters
 **dbName** - Name of the database
+
 **dbType** - Type of the database: document | graph, only document is supported at the moment
+
 **dbUser** - Username for the database
+
 **dbPass** - Password for the database
 
 #### Example
@@ -166,7 +173,9 @@ DBCreate(string dbName [, string dbType = "document" [, string storageType = "pl
 ```
 #### Parameters
 **dbName** - Name of the database
+
 **dbType** - Type of the database: document | graph, _document_ by default, only document is supported at the moment
+
 **storageType** - Storage type: plocal | memory, _plocal_ by default
 
 #### Example
@@ -219,6 +228,7 @@ DBDrop(string dbName [, string dbType = "plocal" ] ) : void
 ```
 #### Parameters
 **dbName** - Name of the database to delete
+
 **dbType** - Type of the database: plocal | memory, _plocal_ by default
 
 #### Example
@@ -254,6 +264,7 @@ Select(string query [, string fetchplan = "*:0" ] ) : array
 ```
 #### Parameters
 **query** - Query to execute
+
 **fetchplan** - Fetchplan, none by default: "*:0"
 
 #### Example
