@@ -28,7 +28,7 @@ class OperationAbstract
 	const REQUEST_DB_CREATE = 4;
 	const REQUEST_DB_CLOSE  = 5;
 	const REQUEST_DB_EXIST  = 6;
-	const REQUEST_DB_DELETE = 7;
+	const REQUEST_DB_DROP   = 7;
 
 	// Database (DB_OPEN Operations)
 	const REQUEST_DATACLUSTER_ADD	= 10;

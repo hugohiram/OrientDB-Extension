@@ -160,6 +160,23 @@ class Orientdb
 		return resourceClass->run(dbName);
 	}
 
+	/**
+	 * drop database if exists
+	 *
+	 * @param string dbName Name of the database to drop
+	 * @param string dbType Type of the database to drop: plocal|memory
+	 * @return array
+	 */
+	public function DBDrop(string dbName, string dbType = "plocal")
+	{
+		this->canPerformServerOperation();
+
+		var resourceClass;
+		let resourceClass = new DBDrop(this);
+
+		return resourceClass->run(dbName, dbType);
+	}
+
 	/////////////////////////////////////////
 	//    Database (DB_OPEN Operations)    //
 	/////////////////////////////////////////

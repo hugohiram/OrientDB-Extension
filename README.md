@@ -118,16 +118,25 @@ Haven't tried in a PHP 5.3.x installation.
 ##### (REQUEST_DB_CLOSE) #####
 
     $orient = new Orientdb\Orientdb('localhost', 2424);
+    $orient->DBOpen('test', 'document', 'admin', 'admin');
     $orient->DBClose();
 
 ### DBExist ###
 ##### (REQUEST_DB_EXIST) #####
 
     $orient = new Orientdb\Orientdb('localhost', 2424);
+    $orient->Connect('admin', 'admin');
     $exists = $orient->DBExist('test');	
 
+### DBDrop ###
+##### (REQUEST_DB_DROP) #####
+
+    $orient = new Orientdb\Orientdb('localhost', 2424);
+    $orient->Connect('admin', 'admin');
+    $orient->DBDrop('test', 'plocal');	
+
 ### Select ###
-##### (Select) #####
+##### (Command) #####
 
     $orient = new Orientdb\Orientdb('localhost', 2424);
     $orient->DBOpen('test', 'document', 'admin', 'admin');
