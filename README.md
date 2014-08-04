@@ -89,69 +89,184 @@ Haven't tried in a PHP 5.3.x installation.
 
 ## Usage ##
 
+
+### Create object ###
+```php
+Orientdb ( string host [, int port = 2424 [, string serialization = "csv" ]] ) : Object
+```
+#### Parameters
+**host** - IP or Host of the OrientDB Server
+**port** - Port used on the OrientDB Server
+**serialization** - Serialization used: csv | binary, only csv supported at the moment
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+```
+
+
 ### Shutdown ###
 ##### (REQUEST_SHUTDOWN) #####
+Shut down the server. Requires "shutdown" permission to be set in orientdb-server-config.xml file. Typically the credentials are those of the OrientDB server administrator. This is not the same as the admin user for individual databases.
+```php
+Shutdown(string username, string password) : void
+```
+#### Parameters
+**username** - Username for the OrientDB Server
+**password** - Password for the OrientDB Server
 
-    $orient = new Orientdb\Orientdb('localhost', 2424);
-    $orient->Shutdown('admin', 'admin');
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->Shutdown('admin', 'admin');
+```
+---
 
 ### Connect ###
 ##### (REQUEST_CONNECT) #####
+This is the first operation requested by the client when it needs to work with the server instance. It returns the session id of the client.
+```php
+Shutdown(string username, string password) : void
+```
+#### Parameters
+**username** - Username for the OrientDB Server
+**password** - Password for the OrientDB Server
 
-    $orient = new Orientdb\Orientdb('localhost', 2424);
-    $orient->Connect('admin', 'admin');
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->Connect('admin', 'admin');
+```
+---
 
 ### DBOpen ###
 ##### (REQUEST_DB_OPEN) #####
+This is the first operation the client should call. It opens a database on the remote OrientDB Server. Returnds an array with the database configuration and clusters.
+```php
+DBOpen(string dbName, string dbType, string dbUser, string dbPass) : array
+```
+#### Parameters
+**dbName** - Name of the database
+**dbType** - Type of the database: document | graph, only document is supported at the moment
+**dbUser** - Username for the database
+**dbPass** - Password for the database
 
-    $orient = new Orientdb\Orientdb('localhost', 2424);
-    $orient->DBOpen('test', 'document', 'admin', 'admin');
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+```
+---
 
 ### DBCreate ###
 ##### (REQUEST_DB_CREATE) #####
+Creates a database in the remote OrientDB server instance
+```php
+DBCreate(string dbName [, string dbType = "document" [, string storageType = "plocal" ]] ) : void
+```
+#### Parameters
+**dbName** - Name of the database
+**dbType** - Type of the database: document | graph, _document_ by default, only document is supported at the moment
+**storageType** - Storage type: plocal | memory, _plocal_ by default
 
-    $orient = new Orientdb\Orientdb('localhost', 2424);
-    $orient->Connect('admin', 'admin');
-    $orient->DBCreate('test', 'document', 'plocal');
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->Connect('admin', 'admin');
+$orient->DBCreate('test', 'document', 'plocal');
+```
+---
 
 ### DBClose ###
 ##### (REQUEST_DB_CLOSE) #####
+Closes the database and the network connection to the OrientDB Server instance. No return is expected.
+```php
+DBClose() : void
+```
+#### Parameters
+no parameters needed
 
-    $orient = new Orientdb\Orientdb('localhost', 2424);
-    $orient->DBOpen('test', 'document', 'admin', 'admin');
-    $orient->DBClose();
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+$orient->DBClose();
+```
+---
 
 ### DBExist ###
 ##### (REQUEST_DB_EXIST) #####
+Asks if a database exists in the OrientDB Server instance, _true_ if exists, _false_ if doesn't exists.
+```php
+DBExist(string dbName) : boolean
+```
+#### Parameters
+**dbName** - Name of the database to check
 
-    $orient = new Orientdb\Orientdb('localhost', 2424);
-    $orient->Connect('admin', 'admin');
-    $exists = $orient->DBExist('test');	
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->Connect('admin', 'admin');
+$exists = $orient->DBExist('test');	
+```
+---
 
 ### DBDrop ###
 ##### (REQUEST_DB_DROP) #####
+Removes a database from the OrientDB Server instance.
+```php
+DBDrop(string dbName [, string dbType = "plocal" ] ) : void
+```
+#### Parameters
+**dbName** - Name of the database to delete
+**dbType** - Type of the database: plocal | memory, _plocal_ by default
 
-    $orient = new Orientdb\Orientdb('localhost', 2424);
-    $orient->Connect('admin', 'admin');
-    $orient->DBDrop('test', 'plocal');	
-
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->Connect('admin', 'admin');
+$orient->DBDrop('test', 'plocal');	
+```
+---
 
 ### DBList ###
 ##### (REQUEST_DB_LIST) #####
+List the database from the server instance.
+```php
+DBList() : array
+```
+#### Parameters
+no parameters needed
 
-    $orient = new Orientdb\Orientdb('localhost', 2424);
-    $orient->Connect('admin', 'admin');
-    $databases = $orient->DBList();	
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->Connect('admin', 'admin');
+$databases = $orient->DBList();	
+```
+---
 
 ### Select ###
-##### (Command) #####
+##### (REQUEST_COMMAND - OSQLSynchQuery) #####
+Executes a _command_ operation of type _OSQLSynchQuery_
+```php
+Select(string query [, string fetchplan = "*:0" ] ) : array
+```
+#### Parameters
+**query** - Query to execute
+**fetchplan** - Fetchplan, none by default: "*:0"
 
-    $orient = new Orientdb\Orientdb('localhost', 2424);
-    $orient->DBOpen('test', 'document', 'admin', 'admin');
-    $records = $orient->select('select from basic');
-    if (!empty($records)) {
-		foreach ($records as $record) {
-		    $data = $record->data;
-			var_dump($data);
-		}
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+$records = $orient->select('select from basic');
+if (!empty($records)) {
+	foreach ($records as $record) {
+	    $data = $record->data;
+		var_dump($data);
 	}
+}
+```
+---
+
