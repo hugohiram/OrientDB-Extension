@@ -95,11 +95,12 @@ Haven't tried in a PHP 5.3.x installation.
 Orientdb ( string host [, int port = 2424 [, string serialization = "csv" ]] ) : Object
 ```
 #### Parameters
-**host** - IP or Host of the OrientDB Server
-
-**port** - Port used on the OrientDB Server
-
-**serialization** - Serialization used: csv | binary, only csv supported at the moment
+Parameter  | Description
+---------- | -------------
+**_host_** | IP or Host of the OrientDB Server
+**_port_** | Port used on the OrientDB Server
+**_serialization_** | Serialization used: csv | binary, only csv supported at the moment
+---------- | -------------
 
 #### Example
 ```php
