@@ -100,7 +100,6 @@ Parameter  | Description
 **_host_** | IP or Host of the OrientDB Server
 **_port_** | Port used on the OrientDB Server
 **_serialization_** | Serialization used: csv | binary, only csv supported at the moment
----------- | -------------
 
 #### Example
 ```php
@@ -115,9 +114,10 @@ Shut down the server. Requires "shutdown" permission to be set in orientdb-serve
 Shutdown(string username, string password) : void
 ```
 #### Parameters
-**username** - Username for the OrientDB Server
-
-**password** - Password for the OrientDB Server
+Parameter  | Description
+---------- | -------------
+**_username_** | Username for the OrientDB Server
+**_password_** | Password for the OrientDB Server
 
 #### Example
 ```php
@@ -133,9 +133,10 @@ This is the first operation requested by the client when it needs to work with t
 Shutdown(string username, string password) : void
 ```
 #### Parameters
-**username** - Username for the OrientDB Server
-
-**password** - Password for the OrientDB Server
+Parameter  | Description
+---------- | -------------
+**_username_** | Username for the OrientDB Server
+**_password_** | Password for the OrientDB Server
 
 #### Example
 ```php
@@ -151,13 +152,12 @@ This is the first operation the client should call. It opens a database on the r
 DBOpen(string dbName, string dbType, string dbUser, string dbPass) : array
 ```
 #### Parameters
-**dbName** - Name of the database
-
-**dbType** - Type of the database: document | graph, only document is supported at the moment
-
-**dbUser** - Username for the database
-
-**dbPass** - Password for the database
+Parameter  | Description
+---------- | -------------
+**_dbName_** - Name of the database
+**_dbType_** - Type of the database: document | graph, only document is supported at the moment
+**_dbUser_** - Username for the database
+**_dbPass_** - Password for the database
 
 #### Example
 ```php
@@ -173,11 +173,11 @@ Creates a database in the remote OrientDB server instance
 DBCreate(string dbName [, string dbType = "document" [, string storageType = "plocal" ]] ) : void
 ```
 #### Parameters
-**dbName** - Name of the database
-
-**dbType** - Type of the database: document | graph, _document_ by default, only document is supported at the moment
-
-**storageType** - Storage type: plocal | memory, _plocal_ by default
+Parameter  | Description
+---------- | -------------
+**_dbName_** | Name of the database
+**_dbType_** | Type of the database: document | graph, _document_ by default, only document is supported at the moment
+**_storageType_** | Storage type: plocal | memory, _plocal_ by default
 
 #### Example
 ```php
@@ -211,7 +211,9 @@ Asks if a database exists in the OrientDB Server instance, _true_ if exists, _fa
 DBExist(string dbName) : boolean
 ```
 #### Parameters
-**dbName** - Name of the database to check
+Parameter  | Description
+---------- | -------------
+**_dbName_** | Name of the database to check
 
 #### Example
 ```php
@@ -228,9 +230,10 @@ Removes a database from the OrientDB Server instance.
 DBDrop(string dbName [, string dbType = "plocal" ] ) : void
 ```
 #### Parameters
-**dbName** - Name of the database to delete
-
-**dbType** - Type of the database: plocal | memory, _plocal_ by default
+Parameter  | Description
+---------- | -------------
+**_dbName_** | Name of the database to delete
+**_dbType_** | Type of the database: plocal | memory, _plocal_ by default
 
 #### Example
 ```php
@@ -264,9 +267,10 @@ Executes a _command_ operation of type _OSQLSynchQuery_
 Select(string query [, string fetchplan = "*:0" ] ) : array
 ```
 #### Parameters
-**query** - Query to execute
-
-**fetchplan** - Fetchplan, none by default: "*:0"
+Parameter  | Description
+---------- | -------------
+**_query_** | Query to execute
+**_fetchplan_** | Fetchplan, none by default: "*:0"
 
 #### Example
 ```php
