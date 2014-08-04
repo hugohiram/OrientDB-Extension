@@ -39,12 +39,12 @@ Haven't tried in a PHP 5.3.x installation.
 * DBCreate (REQUEST_DB_CREATE)
 * DBClose (REQUEST_DB_CLOSE)
 * DBExist (REQUEST_DB_EXIST)
+* DBDrop (REQUEST_DB_DROP)
 * Select (SynchQuery)
 
 ## TODOs ##
 
 * Autoloader
-* REQUEST_DB_DROP
 * REQUEST_CONFIG_GET
 * REQUEST_CONFIG_SET
 * REQUEST_CONFIG_LIST
