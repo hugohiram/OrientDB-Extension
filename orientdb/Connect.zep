@@ -10,7 +10,8 @@
 
 namespace Orientdb;
 
-use Exception;
+use Orientdb\Exception\OrientdbException;
+
 /**
  * Connect() Operation for OrientDB
  *
@@ -101,7 +102,7 @@ class Connect extends OperationAbstract
 				this->handleException();
 			}
 			else {
-				throw new Exception("unknown error", 400);
+				throw new OrientdbException("unknown error", 400);
 			}
 		}
 	}

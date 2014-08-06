@@ -10,7 +10,7 @@
 
 namespace Orientdb;
 
-Use Exception;
+use Orientdb\Exception\OrientdbException;
 
 /**
  * DBOpen() Operation for OrientDB
@@ -141,10 +141,10 @@ class DBOpen extends OperationAbstract
 
 				this->handleException();
 
-				throw new Exception("Could not open database, maybe it doesn't exist, try the DBExist operation", 400);
+				throw new OrientdbException("Could not open database, maybe it doesn't exist, try the DBExist operation", 400);
 			}
 			else {
-				throw new Exception("unknown error", 400);
+				throw new OrientdbException("unknown error", 400);
 			}
 		}
 

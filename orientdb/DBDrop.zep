@@ -10,7 +10,7 @@
 
 namespace Orientdb;
 
-use Exception;
+use Orientdb\Exception\OrientdbException;
 
 /**
  * DBDrop() Operation for OrientDB

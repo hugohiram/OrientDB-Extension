@@ -10,7 +10,7 @@
 
 namespace Orientdb;
 
-use Exception;
+use Orientdb\Exception\OrientdbException;
 
 /**
  * OperationAbstract() for OrientDB
@@ -366,7 +366,7 @@ class OperationAbstract
 			let exceptionClass = this->readString(this->socket);
 			let exceptionMessage = this->readString(this->socket);
 
-			throw new Exception(exceptionMessage, 400);
+			throw new OrientdbException(exceptionMessage, 400);
 			//let exceptionStatus = this->readByte(this->socket);
 			//if (exceptionStatus == (chr(OperationAbstract::EXCEPTION_FOUND))) {
 			//}

@@ -10,8 +10,7 @@
 
 namespace Orientdb;
 
-//use Orientdb\Exception\ConnectionException;
-use Exception; //RuntimeException, DomainException;
+use Orientdb\Exception\OrientdbException;
 
 /**
  * OrientDB
@@ -63,7 +62,7 @@ class Orientdb
 			let this->error = true;
 			let this->errno = "Could not open socket";
 			let this->errstr = 500;
-			throw new Exception(this->errno, this->errstr);
+			throw new OrientdbException(this->errno, this->errstr);
 		}
 
 		switch serialization {
@@ -294,7 +293,7 @@ class Orientdb
 		var transaction;
 		let transaction = this->getSessionDB();
 		if empty transaction {
-			throw new Exception("Cannot perform the '" . this->GetCallingMethodName() . "' operation if not connected to a database");
+			throw new OrientdbException("Cannot perform the '" . this->GetCallingMethodName() . "' operation if not connected to a database");
 		}
 	}
 
@@ -308,7 +307,7 @@ class Orientdb
 		var transaction;
 		let transaction = this->getSessionServer();
 		if empty transaction {
-			throw new Exception("Cannot perform the '" . this->GetCallingMethodName() . "' operation if not connected to a server");
+			throw new OrientdbException("Cannot perform the '" . this->GetCallingMethodName() . "' operation if not connected to a server");
 		}
 	}
 

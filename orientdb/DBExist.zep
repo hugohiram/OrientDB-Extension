@@ -10,7 +10,7 @@
 
 namespace Orientdb;
 
-use Exception;
+use Orientdb\Exception\OrientdbException;
 
 /**
  * DBExist() Operation for OrientDB
@@ -94,7 +94,7 @@ class DBExist extends OperationAbstract
 			}
 		}
 		else {
-			throw new Exception("could not check the database", 400);
+			throw new OrientdbException("could not check the database", 400);
 		}
 
 		return false;

@@ -10,7 +10,7 @@
 
 namespace Orientdb;
 
-use Exception;
+use Orientdb\Exception\OrientdbException;
 
 /**
  * DBCreate() Operation for OrientDB
@@ -104,7 +104,7 @@ class DBCreate extends OperationAbstract
 				this->handleException();
 			}
 			else {
-				throw new Exception("unknown error", 400);
+				throw new OrientdbException("unknown error", 400);
 			}
 		}
 	}

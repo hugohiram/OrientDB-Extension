@@ -10,7 +10,7 @@
 
 namespace Orientdb;
 
-Use Exception;
+use Orientdb\Exception\OrientdbException;
 
 /**
  * Shutdown() Operation for OrientDB
@@ -90,7 +90,7 @@ class Shutdown extends OperationAbstract
 		}
 		else {
 			if (status != (chr(OperationAbstract::STATUS_SUCCESS))) {
-				throw new Exception("unknown error", 400);
+				throw new OrientdbException("unknown error", 400);
 			}
 		}
 	}

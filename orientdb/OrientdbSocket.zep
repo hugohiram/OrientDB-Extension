@@ -10,8 +10,7 @@
 
 namespace Orientdb;
 
-//use Orientdb\Exception\ConnectionException;
-use Exception;//, RuntimeException, DomainException;
+use Orientdb\Exception\OrientdbException;
 
 /**
  * OrientDB
@@ -53,7 +52,7 @@ class OrientDBSocket
 		//let this->socket = fsockopen(protocol . "://" . this->host, this->port, this->errno);
 
 		if this->socket == false {
-			throw new Exception("unable to connect to Server", 500);
+			throw new OrientdbException("unable to connect to Server", 500);
 		}
 
 		stream_set_blocking(this->socket, true);
