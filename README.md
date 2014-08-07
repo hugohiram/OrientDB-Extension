@@ -105,7 +105,22 @@ Parameter  | Description
 ```php
 $orient = new Orientdb\Orientdb('localhost', 2424);
 ```
+---
 
+### Exceptions ###
+When something goes wrong or a criteria is not met, for ecxample when is not possible to connect to a server, the extension will throw an `OrientdbException` exception.
+
+#### Example
+```php
+try{
+    $orient = new Orientdb\Orientdb('locaho..', 2424);
+}
+catch(OrientdbException $e) {
+    var_dump($e->getMessage());
+    var_dump($e->getCode());
+}
+```
+---
 
 ### Shutdown ###
 ##### (REQUEST_SHUTDOWN) #####
