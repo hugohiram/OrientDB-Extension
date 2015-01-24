@@ -3,7 +3,7 @@
   +------------------------------------------------------------------------+
   | Zephir Language                                                        |
   +------------------------------------------------------------------------+
-  | Copyright (c) 2011-2014 Zephir Team (http://www.zephir-lang.com)       |
+  | Copyright (c) 2011-2015 Zephir Team (http://www.zephir-lang.com)       |
   +------------------------------------------------------------------------+
   | This source file is subject to the New BSD License that is bundled     |
   | with this package in the file docs/LICENSE.txt.                        |
@@ -129,9 +129,9 @@ int zephir_fetch_parameters(int num_args TSRMLS_DC, int required_args, int optio
 		} \
 	} while (0)
 
-/**
- * Return zval checking if it's needed to ctor
- */
+#if PHP_VERSION_ID < 50600
+
+/** Return zval checking if it's needed to ctor */
 #define RETURN_CCTOR(var) { \
 		*(return_value) = *(var); \
 		if (Z_TYPE_P(var) > IS_BOOL) { \
@@ -142,9 +142,7 @@ int zephir_fetch_parameters(int num_args TSRMLS_DC, int required_args, int optio
 	ZEPHIR_MM_RESTORE(); \
 	return;
 
-/**
- * Return zval checking if it's needed to ctor, without restoring the memory stack
- */
+/** Return zval checking if it's needed to ctor, without restoring the memory stack  */
 #define RETURN_CCTORW(var) { \
 		*(return_value) = *(var); \
 		if (Z_TYPE_P(var) > IS_BOOL) { \
@@ -154,41 +152,72 @@ int zephir_fetch_parameters(int num_args TSRMLS_DC, int required_args, int optio
 	} \
 	return;
 
-/**
- * Return zval with always ctor
- */
+/** Return zval with always ctor */
 #define RETURN_CTOR(var) { \
 		RETVAL_ZVAL(var, 1, 0); \
 	} \
 	ZEPHIR_MM_RESTORE(); \
 	return;
 
-/**
- * Return zval with always ctor, without restoring the memory stack
- */
+/** Return zval with always ctor, without restoring the memory stack */
 #define RETURN_CTORW(var) { \
 		RETVAL_ZVAL(var, 1, 0); \
 	} \
 	return;
 
-/**
- * Return this pointer
- */
+/** Return this pointer */
 #define RETURN_THIS() { \
 		RETVAL_ZVAL(this_ptr, 1, 0); \
 	} \
 	ZEPHIR_MM_RESTORE(); \
 	return;
 
-/**
- * Return zval with always ctor, without restoring the memory stack
- */
+/** Return zval with always ctor, without restoring the memory stack */
 #define RETURN_THISW() \
 	RETURN_ZVAL(this_ptr, 1, 0);
 
-/**
- * Returns variables without ctor
- */
+#else
+
+/** Return zval checking if it's needed to ctor */
+#define RETURN_CCTOR(var) { \
+		RETVAL_ZVAL_FAST(var); \
+	} \
+	ZEPHIR_MM_RESTORE(); \
+	return;
+
+/** Return zval checking if it's needed to ctor, without restoring the memory stack  */
+#define RETURN_CCTORW(var) { \
+		RETVAL_ZVAL_FAST(var); \
+	} \
+	return;
+
+/** Return zval with always ctor */
+#define RETURN_CTOR(var) { \
+		RETVAL_ZVAL_FAST(var); \
+	} \
+	ZEPHIR_MM_RESTORE(); \
+	return;
+
+/** Return zval with always ctor, without restoring the memory stack */
+#define RETURN_CTORW(var) { \
+		RETVAL_ZVAL_FAST(var); \
+	} \
+	return;
+
+/** Return this pointer */
+#define RETURN_THIS() { \
+		RETVAL_ZVAL_FAST(this_ptr); \
+	} \
+	ZEPHIR_MM_RESTORE(); \
+	return;
+
+/** Return zval with always ctor, without restoring the memory stack */
+#define RETURN_THISW() \
+	RETURN_ZVAL_FAST(this_ptr);
+
+#endif
+
+/** Returns variables without ctor */
 #define RETURN_NCTOR(var) { \
 		*(return_value) = *(var); \
 		INIT_PZVAL(return_value) \
@@ -196,18 +225,14 @@ int zephir_fetch_parameters(int num_args TSRMLS_DC, int required_args, int optio
 	ZEPHIR_MM_RESTORE(); \
 	return;
 
-/**
- * Returns variables without ctor, without restoring the memory stack
- */
+/** Returns variables without ctor, without restoring the memory stack */
 #define RETURN_NCTORW(var) { \
 		*(return_value) = *(var); \
 		INIT_PZVAL(return_value) \
 	} \
 	return;
 
-/**
- * Check for ctor on the same return_value
- */
+/** Check for ctor on the same return_value */
 #define RETURN_SCTOR() \
 	if (Z_TYPE_P(return_value) > IS_BOOL) { \
 		zval_copy_ctor(return_value); \
@@ -303,9 +328,24 @@ int zephir_fetch_parameters(int num_args TSRMLS_DC, int required_args, int optio
 /* Return double */
 #define RETURN_MM_DOUBLE(value)     { RETVAL_DOUBLE(value); ZEPHIR_MM_RESTORE(); return; }
 
+/* Compat for interned strings < 5.4 */
 #ifndef IS_INTERNED
 #define IS_INTERNED(key) 0
 #define INTERNED_HASH(key) 0
+#endif
+
+/* Compat for reallocation of interned strings < 5.4 */
+#ifndef str_erealloc
+#define str_erealloc(str, new_len) \
+	(IS_INTERNED(str) \
+	? _str_erealloc(str, new_len, INTERNED_LEN(str)) \
+	: erealloc(str, new_len))
+
+static inline char *_str_erealloc(char *str, size_t new_len, size_t old_len) {
+	char *buf = (char *) emalloc(new_len);
+	memcpy(buf, str, old_len);
+	return buf;
+}
 #endif
 
 /** Get the current hash key without copying the hash key */
@@ -335,13 +375,46 @@ int zephir_fetch_parameters(int num_args TSRMLS_DC, int required_args, int optio
 		}\
 	}
 
+/** Get current hash key copying the iterator if needed */
+
+#if PHP_VERSION_ID < 50500
+
+#define ZEPHIR_GET_IMKEY(var, it) \
+	{\
+		int key_type, str_key_len; \
+		ulong int_key; \
+		char *str_key; \
+		\
+		ZEPHIR_INIT_NVAR(var); \
+		key_type = it->funcs->get_current_key(it, &str_key, &str_key_len, &int_key TSRMLS_CC); \
+		if (key_type == HASH_KEY_IS_STRING) { \
+			ZVAL_STRINGL(var, str_key, str_key_len, 1); \
+		} else { \
+			if (key_type == HASH_KEY_IS_LONG) { \
+				ZVAL_LONG(var, int_key); \
+			} else { \
+				ZVAL_NULL(var); \
+			} \
+		} \
+	}
+
+#else
+
+#define ZEPHIR_GET_IMKEY(var, it) \
+	{\
+		ZEPHIR_INIT_NVAR(var); \
+		it->funcs->get_current_key(it, var TSRMLS_CC); \
+	}
+
+#endif
+
 /** Foreach */
 #define ZEPHIR_GET_FOREACH_KEY(var, hash, hash_pointer) ZEPHIR_GET_HMKEY(var, hash, hash_pointer)
 
 /** Check if an array is iterable or not */
-#define zephir_is_iterable(var, array_hash, hash_pointer, duplicate, reverse) \
+#define zephir_is_iterable(var, array_hash, hash_pointer, duplicate, reverse, file, line) \
 	if (!var || !zephir_is_iterable_ex(var, array_hash, hash_pointer, duplicate, reverse)) { \
-		ZEPHIR_THROW_EXCEPTION_STRW(zend_exception_get_default(TSRMLS_C), "The argument is not initialized or iterable()"); \
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(zend_exception_get_default(TSRMLS_C), "The argument is not initialized or iterable()", file, line); \
 		ZEPHIR_MM_RESTORE(); \
 		return; \
 	}
@@ -458,10 +531,14 @@ int zephir_fetch_parameters(int num_args TSRMLS_DC, int required_args, int optio
 
 #ifndef ZEPHIR_RELEASE
 #define ZEPHIR_DEBUG_PARAMS , const char *file, int line
+#define ZEPHIR_DEBUG_PARAMS_DUMMY , "", 0
 #else
 #define ZEPHIR_DEBUG_PARAMS , const char *file, int line
+#define ZEPHIR_DEBUG_PARAMS_DUMMY , "", 0
 #endif
 
 #define ZEPHIR_CHECK_POINTER(v) if (!v) fprintf(stderr, "%s:%d\n", __PRETTY_FUNCTION__, __LINE__);
+
+#define zephir_is_php_version(id) ((PHP_VERSION_ID >= id && PHP_VERSION_ID <= (id + 10000)) ?  1 : 0)
 
 #endif /* ZEPHIR_KERNEL_MAIN_H */

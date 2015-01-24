@@ -3,7 +3,7 @@
 	+------------------------------------------------------------------------+
 	| Zephir Language                                                        |
 	+------------------------------------------------------------------------+
-	| Copyright (c) 2011-2014 Zephir Team  (http://www.zephir-lang.com)      |
+	| Copyright (c) 2011-2015 Zephir Team  (http://www.zephir-lang.com)      |
 	+------------------------------------------------------------------------+
 	| This source file is subject to the New BSD License that is bundled     |
 	| with this package in the file docs/LICENSE.txt.                        |
@@ -23,11 +23,6 @@
 #endif
 
 #include "php.h"
-
-#ifdef PHP_WIN32
-#include "php_string.h"
-#endif
-
 #include "php_ext.h"
 
 #include "kernel/main.h"

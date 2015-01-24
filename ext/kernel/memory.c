@@ -3,7 +3,7 @@
   +------------------------------------------------------------------------+
   | Zephir Language                                                        |
   +------------------------------------------------------------------------+
-  | Copyright (c) 2011-2014 Zephir Team (http://www.zephir-lang.com)       |
+  | Copyright (c) 2011-2015 Zephir Team (http://www.zephir-lang.com)       |
   +------------------------------------------------------------------------+
   | This source file is subject to the New BSD License that is bundled     |
   | with this package in the file docs/LICENSE.txt.                        |
@@ -55,7 +55,9 @@ static zephir_memory_entry* zephir_memory_grow_stack_common(zend_zephir_globals_
 #endif
 	}
 	else if (!g->active_memory->next) {
+#ifndef PHP_WIN32
 		assert(g->active_memory >= g->end_memory - 1 || g->active_memory < g->start_memory);
+#endif
 		zephir_memory_entry *entry = (zephir_memory_entry *) ecalloc(1, sizeof(zephir_memory_entry));
 	/* ecalloc() will take care of these members
 		entry->pointer   = 0;
@@ -88,11 +90,15 @@ static zephir_memory_entry* zephir_memory_grow_stack_common(zend_zephir_globals_
 	return g->active_memory;
 }
 
+/**
+ * Restore a memory stack applying GC to all observed variables
+ */
 static void zephir_memory_restore_stack_common(zend_zephir_globals_def *g TSRMLS_DC)
 {
 	size_t i;
 	zephir_memory_entry *prev, *active_memory;
 	zephir_symbol_table *active_symbol_table;
+	zval **ptr;
 
 	active_memory = g->active_memory;
 	assert(active_memory != NULL);
@@ -152,11 +158,16 @@ static void zephir_memory_restore_stack_common(zend_zephir_globals_def *g TSRMLS
 
 		/* Traverse all zvals allocated, reduce the reference counting or free them */
 		for (i = 0; i < active_memory->pointer; ++i) {
-			if (EXPECTED(active_memory->addresses[i] != NULL && *(active_memory->addresses[i]) != NULL)) {
-				if (Z_REFCOUNT_PP(active_memory->addresses[i]) == 1) {
-					zval_ptr_dtor(active_memory->addresses[i]);
+			ptr = active_memory->addresses[i];
+			if (EXPECTED(ptr != NULL && *(ptr) != NULL)) {
+				if (Z_REFCOUNT_PP(ptr) == 1) {
+					if (!Z_ISREF_PP(ptr)) {
+						zval_ptr_dtor(ptr);
+					} else {
+						efree(*ptr);
+					}
 				} else {
-					Z_DELREF_PP(active_memory->addresses[i]);
+					Z_DELREF_PP(ptr);
 				}
 			}
 		}
@@ -185,12 +196,10 @@ static void zephir_memory_restore_stack_common(zend_zephir_globals_def *g TSRMLS
 		efree(g->active_memory);
 		g->active_memory = prev;
 		prev->next = NULL;
-	}
-	else {
+	} else {
 #ifndef ZEPHIR_RELEASE
 		assert(g->active_memory->permanent == 1);
 #endif
-
 		active_memory->pointer      = 0;
 		active_memory->hash_pointer = 0;
 		g->active_memory = prev;
@@ -213,6 +222,9 @@ static void zephir_memory_restore_stack_common(zend_zephir_globals_def *g TSRMLS
 
 #ifndef ZEPHIR_RELEASE
 
+/**
+ * Dumps a memory frame for debug purposes
+ */
 void zephir_dump_memory_frame(zephir_memory_entry *active_memory TSRMLS_DC)
 {
 	size_t i;
@@ -305,16 +317,27 @@ int ZEND_FASTCALL zephir_memory_restore_stack(const char *func TSRMLS_DC)
  */
 void ZEND_FASTCALL zephir_memory_grow_stack(const char *func TSRMLS_DC)
 {
-	zephir_memory_entry *entry = zephir_memory_grow_stack_common(ZEPHIR_VGLOBAL);
+	zephir_memory_entry *entry;
+	zend_zephir_globals_def *g = ZEPHIR_VGLOBAL;
+	if (g->start_memory == NULL) {
+		zephir_initialize_memory(g TSRMLS_CC);
+	}
+	entry = zephir_memory_grow_stack_common(g);
 	entry->func = func;
 }
+
 #else
+
 /**
  * Adds a memory frame in the current executed method
  */
 void ZEND_FASTCALL zephir_memory_grow_stack(TSRMLS_D)
 {
-	zephir_memory_grow_stack_common(ZEPHIR_VGLOBAL);
+	zend_zephir_globals_def *g = ZEPHIR_VGLOBAL;
+	if (g->start_memory == NULL) {
+		zephir_initialize_memory(g TSRMLS_CC);
+	}
+	zephir_memory_grow_stack_common(g);
 }
 
 /**
@@ -325,7 +348,157 @@ int ZEND_FASTCALL zephir_memory_restore_stack(TSRMLS_D)
 	zephir_memory_restore_stack_common(ZEPHIR_VGLOBAL TSRMLS_CC);
 	return SUCCESS;
 }
+
 #endif
+
+/**
+ * Pre-allocates memory for further use in execution
+ */
+void zephir_initialize_memory(zend_zephir_globals_def *zephir_globals_ptr TSRMLS_DC)
+{
+	zephir_memory_entry *start;
+	size_t i;
+
+	start = (zephir_memory_entry *) pecalloc(ZEPHIR_NUM_PREALLOCATED_FRAMES, sizeof(zephir_memory_entry), 1);
+/* pecalloc() will take care of these members for every frame
+	start->pointer      = 0;
+	start->hash_pointer = 0;
+	start->prev = NULL;
+	start->next = NULL;
+*/
+	for (i = 0; i < ZEPHIR_NUM_PREALLOCATED_FRAMES; ++i) {
+		start[i].addresses       = pecalloc(24, sizeof(zval*), 1);
+		start[i].capacity        = 24;
+		start[i].hash_addresses  = pecalloc(8, sizeof(zval*), 1);
+		start[i].hash_capacity   = 8;
+
+#ifndef ZEPHIR_RELEASE
+		start[i].permanent = 1;
+#endif
+	}
+
+	start[0].next = &start[1];
+	start[ZEPHIR_NUM_PREALLOCATED_FRAMES - 1].prev = &start[ZEPHIR_NUM_PREALLOCATED_FRAMES - 2];
+
+	for (i = 1; i < ZEPHIR_NUM_PREALLOCATED_FRAMES - 1; ++i) {
+		start[i].next = &start[i + 1];
+		start[i].prev = &start[i - 1];
+	}
+
+	zephir_globals_ptr->start_memory = start;
+	zephir_globals_ptr->end_memory   = start + ZEPHIR_NUM_PREALLOCATED_FRAMES;
+
+	zephir_globals_ptr->fcache = pemalloc(sizeof(HashTable), 1);
+	zend_hash_init(zephir_globals_ptr->fcache, 128, NULL, NULL, 1); // zephir_fcall_cache_dtor
+
+	/* 'Allocator sizeof operand mismatch' warning can be safely ignored */
+	ALLOC_INIT_ZVAL(zephir_globals_ptr->global_null);
+	Z_SET_REFCOUNT_P(zephir_globals_ptr->global_null, 2);
+
+	/* 'Allocator sizeof operand mismatch' warning can be safely ignored */
+	ALLOC_INIT_ZVAL(zephir_globals_ptr->global_false);
+	Z_SET_REFCOUNT_P(zephir_globals_ptr->global_false, 2);
+	ZVAL_FALSE(zephir_globals_ptr->global_false);
+
+	/* 'Allocator sizeof operand mismatch' warning can be safely ignored */
+	ALLOC_INIT_ZVAL(zephir_globals_ptr->global_true);
+	Z_SET_REFCOUNT_P(zephir_globals_ptr->global_true, 2);
+	ZVAL_TRUE(zephir_globals_ptr->global_true);
+
+	zephir_globals_ptr->initialized = 1;
+}
+
+/**
+ * Cleans the function/method cache up
+ */
+int zephir_cleanup_fcache(void *pDest TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	zephir_fcall_cache_entry **entry = (zephir_fcall_cache_entry**) pDest;
+	zend_class_entry *scope;
+	uint len = hash_key->nKeyLength;
+
+	assert(hash_key->arKey != NULL);
+	assert(hash_key->nKeyLength > 2 * sizeof(zend_class_entry**));
+
+	memcpy(&scope, &hash_key->arKey[len - 2 * sizeof(zend_class_entry**)], sizeof(zend_class_entry*));
+
+/*
+#ifndef ZEPHIR_RELEASE
+	{
+		zend_class_entry *cls;
+		memcpy(&cls, &hash_key->arKey[len - sizeof(zend_class_entry**)], sizeof(zend_class_entry*));
+
+		fprintf(stderr, "func: %s, cls: %s, scope: %s [%u]\n", (*entry)->f->common.function_name, (cls ? cls->name : "N/A"), (scope ? scope->name : "N/A"), (uint)(*entry)->times);
+	}
+#endif
+*/
+
+#ifndef ZEPHIR_RELEASE
+	if ((*entry)->f->type != ZEND_INTERNAL_FUNCTION || (scope && scope->type != ZEND_INTERNAL_CLASS)) {
+		return ZEND_HASH_APPLY_REMOVE;
+	}
+#else
+	if ((*entry)->type != ZEND_INTERNAL_FUNCTION || (scope && scope->type != ZEND_INTERNAL_CLASS)) {
+		return ZEND_HASH_APPLY_REMOVE;
+	}
+#endif
+
+#if PHP_VERSION_ID >= 50400
+	if (scope && scope->type == ZEND_INTERNAL_CLASS && scope->info.internal.module->type != MODULE_PERSISTENT) {
+		return ZEND_HASH_APPLY_REMOVE;
+	}
+#else
+	if (scope && scope->type == ZEND_INTERNAL_CLASS && scope->module->type != MODULE_PERSISTENT) {
+		return ZEND_HASH_APPLY_REMOVE;
+	}
+#endif
+
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+/**
+ * Deinitializes all the memory allocated by Zephir
+ */
+void zephir_deinitialize_memory(TSRMLS_D)
+{
+	size_t i;
+	zend_zephir_globals_def *zephir_globals_ptr = ZEPHIR_VGLOBAL;
+
+	if (zephir_globals_ptr->initialized != 1) {
+		zephir_globals_ptr->initialized = 0;
+		return;
+	}
+
+	if (zephir_globals_ptr->start_memory != NULL) {
+		zephir_clean_restore_stack(TSRMLS_C);
+	}
+
+	zend_hash_apply_with_arguments(zephir_globals_ptr->fcache TSRMLS_CC, zephir_cleanup_fcache, 0);
+
+#ifndef ZEPHIR_RELEASE
+	assert(zephir_globals_ptr->start_memory != NULL);
+#endif
+
+	for (i = 0; i < ZEPHIR_NUM_PREALLOCATED_FRAMES; ++i) {
+		pefree(zephir_globals_ptr->start_memory[i].hash_addresses, 1);
+		pefree(zephir_globals_ptr->start_memory[i].addresses, 1);
+	}
+
+	pefree(zephir_globals_ptr->start_memory, 1);
+	zephir_globals_ptr->start_memory = NULL;
+
+	zend_hash_destroy(zephir_globals_ptr->fcache);
+	pefree(zephir_globals_ptr->fcache, 1);
+	zephir_globals_ptr->fcache = NULL;
+
+	for (i = 0; i < 2; i++) {
+		zval_ptr_dtor(&zephir_globals_ptr->global_null);
+		zval_ptr_dtor(&zephir_globals_ptr->global_false);
+		zval_ptr_dtor(&zephir_globals_ptr->global_true);
+	}
+
+	zephir_globals_ptr->initialized = 0;
+}
 
 ZEPHIR_ATTR_NONNULL static void zephir_reallocate_memory(const zend_zephir_globals_def *g)
 {
@@ -416,6 +589,35 @@ void ZEND_FASTCALL zephir_memory_alloc(zval **var TSRMLS_DC)
 }
 
 /**
+ * Releases memory for an allocated zval
+ */
+void ZEND_FASTCALL zephir_ptr_dtor(zval **var)
+{
+	if (!Z_ISREF_PP(var)) {
+		zval_ptr_dtor(var);
+	} else {
+		if (Z_REFCOUNT_PP(var) == 0) {
+			efree(*var);
+		} else {
+			Z_DELREF_PP(var);
+			if (Z_REFCOUNT_PP(var) == 0) {
+				efree(*var);
+			}
+		}
+	}
+}
+
+/**
+ * Releases memory for an allocated zval
+ */
+void ZEND_FASTCALL zephir_dtor(zval *var)
+{
+	if (!Z_ISREF_P(var)) {
+		zval_dtor(var);
+	}
+}
+
+/**
  * Observes a variable and allocates memory for it
  * Marks hash key zvals to be nulled before freeing
  */
@@ -452,7 +654,7 @@ void ZEND_FASTCALL zephir_memory_remove(zval **var TSRMLS_DC) {
 }
 
 /**
- * Cleans the phalcon memory stack recursivery
+ * Cleans the zephir memory stack recursivery
  */
 int ZEND_FASTCALL zephir_clean_restore_stack(TSRMLS_D) {
 

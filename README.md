@@ -19,7 +19,7 @@ This extension requires:
     * PCRE extension
     * JSON extension (php5-json)
     * PHP development headers and tools (php5-dev)
-* [Zephir 0.4.2](http://zephir-lang.com/install.html)
+* [Zephir 0.5.9](http://zephir-lang.com/install.html)
 
 Haven't tried in a PHP 5.3.x installation.
 

@@ -3,7 +3,7 @@
   +------------------------------------------------------------------------+
   | Zephir Language                                                        |
   +------------------------------------------------------------------------+
-  | Copyright (c) 2011-2014 Zephir Team (http://www.zephir-lang.com)       |
+  | Copyright (c) 2011-2015 Zephir Team (http://www.zephir-lang.com)       |
   +------------------------------------------------------------------------+
   | This source file is subject to the New BSD License that is bundled     |
   | with this package in the file docs/LICENSE.txt.                        |
@@ -345,10 +345,10 @@ int ZEPHIR_FASTCALL zephir_array_unset_long(zval **arr, unsigned long index, int
  * @retval @c SUCCESS Success
  * @throw @c E_WARNING if @a is not an array
  */
-int zephir_array_append(zval **arr, zval *value, int flags) {
+int zephir_array_append(zval **arr, zval *value, int flags ZEPHIR_DEBUG_PARAMS) {
 
 	if (Z_TYPE_PP(arr) != IS_ARRAY) {
-		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+		zend_error(E_WARNING, "Cannot use a scalar value as an array in %s on line %d", file, line);
 		return FAILURE;
 	}
 
@@ -381,7 +381,7 @@ int zephir_array_append_long(zval **arr, long value, int separate) {
 	Z_SET_REFCOUNT_P(zvalue, 0);
 	ZVAL_LONG(zvalue, value);
 
-	return zephir_array_append(arr, zvalue, separate);
+	return zephir_array_append(arr, zvalue, separate ZEPHIR_DEBUG_PARAMS_DUMMY);
 }
 
 /**
@@ -406,7 +406,7 @@ int zephir_array_append_string(zval **arr, char *value, uint value_length, int s
 	Z_SET_REFCOUNT_P(zvalue, 0);
 	ZVAL_STRINGL(zvalue, value, value_length, 1);
 
-	return zephir_array_append(arr, zvalue, separate);
+	return zephir_array_append(arr, zvalue, separate ZEPHIR_DEBUG_PARAMS_DUMMY);
 }
 
 /**
@@ -432,7 +432,7 @@ int zephir_array_update_zval(zval **arr, zval *index, zval **value, int flags) {
 	HashTable *ht;
 
 	if (Z_TYPE_PP(arr) != IS_ARRAY) {
-		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+		zend_error(E_WARNING, "Cannot use a scalar value as an array (2)");
 		return FAILURE;
 	}
 
@@ -590,7 +590,7 @@ int zephir_array_update_zval_long(zval **arr, zval *index, long value, int flags
 int zephir_array_update_quick_string(zval **arr, const char *index, uint index_length, unsigned long key, zval **value, int flags){
 
 	if (Z_TYPE_PP(arr) != IS_ARRAY) {
-		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+		zend_error(E_WARNING, "Cannot use a scalar value as an array (3)");
 		return FAILURE;
 	}
 
@@ -756,7 +756,7 @@ int zephir_array_update_string_string(zval **arr, const char *index, uint index_
 int zephir_array_update_long(zval **arr, unsigned long index, zval **value, int flags ZEPHIR_DEBUG_PARAMS){
 
 	if (Z_TYPE_PP(arr) != IS_ARRAY) {
-		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+		zend_error(E_WARNING, "Cannot use a scalar value as an array in %s on line %d", file, line);
 		return FAILURE;
 	}
 
@@ -795,7 +795,7 @@ int zephir_array_update_long(zval **arr, unsigned long index, zval **value, int 
  * @warning @c *return_value should be either @c NULL (preferred) or point to not initialized memory; if @c *return_value points to a valid variable, mmemory leak is possible
  * @note @c index will be handled as follows: @c NULL is treated as an empty string, @c double values are cast to @c integer, @c bool or @c resource are treated as @c integer
  */
-int zephir_array_fetch(zval **return_value, zval *arr, zval *index, int flags TSRMLS_DC){
+int zephir_array_fetch(zval **return_value, zval *arr, zval *index, int flags ZEPHIR_DEBUG_PARAMS TSRMLS_DC){
 
 	zval **zv;
 	HashTable *ht;
@@ -830,7 +830,7 @@ int zephir_array_fetch(zval **return_value, zval *arr, zval *index, int flags TS
 
 			default:
 				if ((flags & PH_NOISY) == PH_NOISY) {
-					zend_error(E_WARNING, "Illegal offset type");
+					zend_error(E_WARNING, "Illegal offset type in %s on line %d", file, line);
 				}
 				result = FAILURE;
 				break;
@@ -846,9 +846,9 @@ int zephir_array_fetch(zval **return_value, zval *arr, zval *index, int flags TS
 
 		if ((flags & PH_NOISY) == PH_NOISY) {
 			if (sidx == NULL) {
-				zend_error(E_NOTICE, "Undefined index: %ld", uidx);
+				zend_error(E_NOTICE, "Undefined index: %ld in %s on line %d", uidx, file, line);
 			} else {
-				zend_error(E_NOTICE, "Undefined index: %s", sidx);
+				zend_error(E_NOTICE, "Undefined index: %s in %s on line %d", sidx, file, line);
 			}
 		}
 	}
@@ -875,7 +875,7 @@ int zephir_array_fetch(zval **return_value, zval *arr, zval *index, int flags TS
  * @throw @c E_NOTICE if @c index does not exist and @c silent = @c PH_NOISY
  * @warning @c *return_value should be either @c NULL (preferred) or point to not initialized memory; if @c *return_value points to a valid variable, mmemory leak is possible
  */
-int zephir_array_fetch_quick_string(zval **return_value, zval *arr, const char *index, uint index_length, unsigned long key, int flags TSRMLS_DC){
+int zephir_array_fetch_quick_string(zval **return_value, zval *arr, const char *index, uint index_length, unsigned long key, int flags ZEPHIR_DEBUG_PARAMS TSRMLS_DC){
 
 	zval **zv;
 
@@ -892,7 +892,7 @@ int zephir_array_fetch_quick_string(zval **return_value, zval *arr, const char *
 		}
 	} else {
 		if ((flags & PH_NOISY) == PH_NOISY) {
-			zend_error(E_NOTICE, "Cannot use a scalar value as an array");
+			zend_error(E_NOTICE, "Cannot use a scalar value as an array in %s on line %d", file, line);
 		}
 	}
 
@@ -920,9 +920,9 @@ int zephir_array_fetch_quick_string(zval **return_value, zval *arr, const char *
  *
  * The function is a wrapper over @c zephir_array_fetch_quick_string()
  */
-int zephir_array_fetch_string(zval **return_value, zval *arr, const char *index, uint index_length, int flags TSRMLS_DC){
+int zephir_array_fetch_string(zval **return_value, zval *arr, const char *index, uint index_length, int flags ZEPHIR_DEBUG_PARAMS TSRMLS_DC){
 
-	return zephir_array_fetch_quick_string(return_value, arr, index, index_length + 1, zend_inline_hash_func(index, index_length + 1), flags TSRMLS_CC);
+	return zephir_array_fetch_quick_string(return_value, arr, index, index_length + 1, zend_inline_hash_func(index, index_length + 1), flags, file, line TSRMLS_CC);
 }
 
 /**
@@ -938,7 +938,7 @@ int zephir_array_fetch_string(zval **return_value, zval *arr, const char *index,
  * @throw @c E_NOTICE if @c index does not exist and @c silent = @c PH_NOISY
  * @warning @c *return_value should be either @c NULL (preferred) or point to not initialized memory; if @c *return_value points to a valid variable, mmemory leak is possible
  */
-int zephir_array_fetch_long(zval **return_value, zval *arr, unsigned long index, int flags TSRMLS_DC){
+int zephir_array_fetch_long(zval **return_value, zval *arr, unsigned long index, int flags ZEPHIR_DEBUG_PARAMS TSRMLS_DC){
 
 	zval **zv;
 
@@ -952,12 +952,12 @@ int zephir_array_fetch_long(zval **return_value, zval *arr, unsigned long index,
 		}
 
 		if ((flags & PH_NOISY) == PH_NOISY) {
-			zend_error(E_NOTICE, "Undefined index: %lu", index);
+			zend_error(E_NOTICE, "Undefined index: %lu in %s on line %d", index, file, line);
 		}
 	}
 	else {
 		if ((flags & PH_NOISY) == PH_NOISY) {
-			zend_error(E_NOTICE, "Cannot use a scalar value as an array");
+			zend_error(E_NOTICE, "Cannot use a scalar value as an array in %s on line %d", file, line);
 		}
 	}
 
@@ -1117,8 +1117,8 @@ void zephir_array_merge_recursive_n(zval **a1, zval *a2 TSRMLS_DC)
 		if (!zephir_array_isset(*a1, &key) || Z_TYPE_PP(value) != IS_ARRAY) {
 			zephir_array_update_zval(a1, &key, value, PH_COPY | PH_SEPARATE);
 		} else {
-			zephir_array_fetch(&tmp1, *a1, &key, PH_NOISY TSRMLS_CC);
-			zephir_array_fetch(&tmp2, a2, &key, PH_NOISY TSRMLS_CC);
+			zephir_array_fetch(&tmp1, *a1, &key, PH_NOISY ZEPHIR_DEBUG_PARAMS_DUMMY TSRMLS_CC);
+			zephir_array_fetch(&tmp2, a2, &key, PH_NOISY ZEPHIR_DEBUG_PARAMS_DUMMY TSRMLS_CC);
 			zephir_array_merge_recursive_n(&tmp1, tmp2 TSRMLS_CC);
 			zval_ptr_dtor(&tmp1);
 			zval_ptr_dtor(&tmp2);
@@ -1135,6 +1135,8 @@ void zephir_array_merge_recursive_n(zval **a1, zval *a2 TSRMLS_DC)
 void zephir_array_unshift(zval *arr, zval *arg TSRMLS_DC)
 {
 	if (likely(Z_TYPE_P(arr) == IS_ARRAY)) {
+
+		HashTable  oldhash;
 		zval** args[1]      = { &arg };
 
 		HashTable *newhash = Z_ARRVAL_P(arr);
@@ -1145,7 +1147,7 @@ void zephir_array_unshift(zval *arr, zval *arg TSRMLS_DC)
 			php_splice(newhash, 0, 0, args, 1, NULL TSRMLS_CC);
 		#endif
 
-		HashTable  oldhash = *Z_ARRVAL_P(arr);
+		oldhash = *Z_ARRVAL_P(arr);
 		*Z_ARRVAL_P(arr)   = *newhash;
 
 		FREE_HASHTABLE(newhash);
@@ -1263,92 +1265,197 @@ int zephir_array_is_associative(zval *arr) {
 /**
  * Multiple array-offset update
  */
-int zephir_array_update_multi(zval **arr, zval **value TSRMLS_DC, const char *types, int types_length, int types_count, ...) {
-
-	int i, l, ll; char *s;
+int zephir_array_update_multi(zval **arr, zval **value TSRMLS_DC, const char *types, int types_length, int types_count, ...)
+{
 	va_list ap;
-	zval *fetched, *tmp, *p, *item;
+	long old_l[ZEPHIR_MAX_ARRAY_LEVELS], old_ll[ZEPHIR_MAX_ARRAY_LEVELS];
+	char *s, *old_s[ZEPHIR_MAX_ARRAY_LEVELS], old_type[ZEPHIR_MAX_ARRAY_LEVELS];
+	zval *fetched, *tmp, *p, *item, *old_item[ZEPHIR_MAX_ARRAY_LEVELS], *old_p[ZEPHIR_MAX_ARRAY_LEVELS];
+	int i, j, l, ll, re_update, must_continue, wrap_tmp;
 
 	va_start(ap, types_count);
 
+	assert(types_length < ZEPHIR_MAX_ARRAY_LEVELS);
+
+	SEPARATE_ZVAL_IF_NOT_REF(arr);
+
+/*
+	memset(old_type, '\0', ZEPHIR_MAX_ARRAY_LEVELS);
+	memset(old_s, '\0', ZEPHIR_MAX_ARRAY_LEVELS);
+	memset(old_p, '\0', ZEPHIR_MAX_ARRAY_LEVELS);
+	memset(old_item, '\0', ZEPHIR_MAX_ARRAY_LEVELS);
+*/
+
 	p = *arr;
+
 	for (i = 0; i < types_length; ++i) {
 
+		re_update = 0;
+		must_continue = 0;
+		wrap_tmp = 0;
+
+		old_p[i] = p;
 		switch (types[i]) {
 
 			case 's':
 				s = va_arg(ap, char*);
 				l = va_arg(ap, int);
-				if (zephir_array_isset_string_fetch(&fetched, p, s, l + 1, 1 TSRMLS_CC)) {
+				old_s[i] = s;
+				old_l[i] = l;
+				if (zephir_array_isset_string_fetch(&fetched, p, s, l + 1, 0 TSRMLS_CC)) {
 					if (Z_TYPE_P(fetched) == IS_ARRAY) {
 						if (i == (types_length - 1)) {
 							zephir_array_update_string(&fetched, s, l, value, PH_COPY | PH_SEPARATE);
 						} else {
 							p = fetched;
 						}
-						continue;
+						must_continue = 1;
 					}
-				}
-				if (i == (types_length - 1)) {
-					zephir_array_update_string(&p, s, l, value, PH_COPY | PH_SEPARATE);
 				} else {
-					MAKE_STD_ZVAL(tmp);
-					array_init(tmp);
-					zephir_array_update_string(&p, s, l, &tmp, PH_SEPARATE);
-					p = tmp;
+					Z_DELREF_P(fetched);
+				}
+				if (!must_continue) {
+					re_update = Z_REFCOUNT_P(p) > 1 && !Z_ISREF_P(p);
+					if (i == (types_length - 1)) {
+						zephir_array_update_string(&p, s, l, value, PH_COPY | PH_SEPARATE);
+					} else {
+						MAKE_STD_ZVAL(tmp);
+						array_init(tmp);
+						zephir_array_update_string(&p, s, l, &tmp, PH_SEPARATE);
+						if (re_update) {
+							wrap_tmp = 1;
+						} else {
+							p = tmp;
+						}
+					}
 				}
 				break;
 
 			case 'l':
 				ll = va_arg(ap, long);
-				if (zephir_array_isset_long_fetch(&fetched, p, ll, 1 TSRMLS_CC)) {
+				old_ll[i] = ll;
+				if (zephir_array_isset_long_fetch(&fetched, p, ll, 0 TSRMLS_CC)) {
 					if (Z_TYPE_P(fetched) == IS_ARRAY) {
 						if (i == (types_length - 1)) {
-							zephir_array_update_long(&fetched, ll, value, PH_COPY | PH_SEPARATE, "", 0);
+							zephir_array_update_long(&fetched, ll, value, PH_COPY | PH_SEPARATE ZEPHIR_DEBUG_PARAMS_DUMMY);
 						} else {
 							p = fetched;
 						}
-						continue;
+						must_continue = 1;
 					}
-				}
-				if (i == (types_length - 1)) {
-					zephir_array_update_long(&p, ll, value, PH_COPY | PH_SEPARATE, "", 0);
 				} else {
-					MAKE_STD_ZVAL(tmp);
-					array_init(tmp);
-					zephir_array_update_long(&p, ll, &tmp, PH_SEPARATE, "", 0);
-					p = tmp;
+					Z_DELREF_P(fetched);
+				}
+				if (!must_continue) {
+					re_update = Z_REFCOUNT_P(p) > 1 && !Z_ISREF_P(p);
+					if (i == (types_length - 1)) {
+						zephir_array_update_long(&p, ll, value, PH_COPY | PH_SEPARATE ZEPHIR_DEBUG_PARAMS_DUMMY);
+					} else {
+						MAKE_STD_ZVAL(tmp);
+						array_init(tmp);
+						zephir_array_update_long(&p, ll, &tmp, PH_SEPARATE ZEPHIR_DEBUG_PARAMS_DUMMY);
+						if (re_update) {
+							wrap_tmp = 1;
+						} else {
+							p = tmp;
+						}
+					}
 				}
 				break;
 
 			case 'z':
 				item = va_arg(ap, zval*);
-				if (zephir_array_isset_fetch(&fetched, p, item, 1 TSRMLS_CC)) {
+				old_item[i] = item;
+				if (zephir_array_isset_fetch(&fetched, p, item, 0 TSRMLS_CC)) {
 					if (Z_TYPE_P(fetched) == IS_ARRAY) {
 						if (i == (types_length - 1)) {
 							zephir_array_update_zval(&fetched, item, value, PH_COPY | PH_SEPARATE);
 						} else {
 							p = fetched;
 						}
-						continue;
+						must_continue = 1;
 					}
-				}
-				if (i == (types_length - 1)) {
-					zephir_array_update_zval(&p, item, value, PH_COPY | PH_SEPARATE);
 				} else {
-					MAKE_STD_ZVAL(tmp);
-					array_init(tmp);
-					zephir_array_update_zval(&p, item, &tmp, PH_SEPARATE);
-					p = tmp;
+					Z_DELREF_P(fetched);
+				}
+				if (!must_continue) {
+					re_update = Z_REFCOUNT_P(p) > 1 && !Z_ISREF_P(p);
+					if (i == (types_length - 1)) {
+						zephir_array_update_zval(&p, item, value, PH_COPY | PH_SEPARATE);
+					} else {
+						MAKE_STD_ZVAL(tmp);
+						array_init(tmp);
+						zephir_array_update_zval(&p, item, &tmp, PH_SEPARATE);
+						if (re_update) {
+							wrap_tmp = 1;
+						} else {
+							p = tmp;
+						}
+					}
 				}
 				break;
 
 			case 'a':
-				zephir_array_append(&p, *value, PH_SEPARATE);
+				re_update = Z_REFCOUNT_P(p) > 1 && !Z_ISREF_P(p);
+				zephir_array_append(&p, *value, PH_SEPARATE ZEPHIR_DEBUG_PARAMS_DUMMY);
 				break;
 		}
-	}
 
+		if (re_update) {
+
+			for (j = i - 1; j >= 0; j--) {
+
+				if (!re_update) {
+					break;
+				}
+
+				re_update = Z_REFCOUNT_P(old_p[j]) > 1 && !Z_ISREF_P(old_p[j]);
+				switch (old_type[j]) {
+
+					case 's':
+						if (j == i - 1) {
+							zephir_array_update_string(&(old_p[j]), old_s[j], old_l[j], &p, PH_SEPARATE);
+						} else {
+							zephir_array_update_string(&(old_p[j]), old_s[j], old_l[j], &old_p[j+1], PH_SEPARATE);
+						}
+						if (wrap_tmp) {
+							p = tmp;
+							wrap_tmp = 0;
+						}
+						break;
+
+					case 'l':
+						if (j == i - 1) {
+							zephir_array_update_long(&(old_p[j]), old_ll[j], &p, PH_SEPARATE ZEPHIR_DEBUG_PARAMS_DUMMY);
+						} else {
+							zephir_array_update_long(&(old_p[j]), old_ll[j], &old_p[j+1], PH_SEPARATE ZEPHIR_DEBUG_PARAMS_DUMMY);
+						}
+						if (wrap_tmp) {
+							p = tmp;
+							wrap_tmp = 0;
+						}
+						break;
+
+					case 'z':
+						if (j == i - 1) {
+							zephir_array_update_zval(&(old_p[j]), old_item[j], &p, PH_SEPARATE);
+						} else {
+							zephir_array_update_zval(&(old_p[j]), old_item[j], &old_p[j+1], PH_SEPARATE);
+						}
+						if (wrap_tmp) {
+							p = tmp;
+							wrap_tmp = 0;
+						}
+						break;
+				}
+
+			}
+		}
+
+		if (i != (types_length - 1)) {
+			old_type[i] = types[i];
+		}
+	}
 	va_end(ap);
 
 	return 0;

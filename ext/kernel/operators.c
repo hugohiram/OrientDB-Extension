@@ -3,7 +3,7 @@
   +------------------------------------------------------------------------+
   | Zephir Language                                                        |
   +------------------------------------------------------------------------+
-  | Copyright (c) 2011-2014 Zephir Team (http://www.zephir-lang.com)       |
+  | Copyright (c) 2011-2015 Zephir Team (http://www.zephir-lang.com)       |
   +------------------------------------------------------------------------+
   | This source file is subject to the New BSD License that is bundled     |
   | with this package in the file docs/LICENSE.txt.                        |
@@ -28,6 +28,7 @@
 #include "kernel/main.h"
 #include "kernel/memory.h"
 #include "kernel/string.h"
+#include "kernel/operators.h"
 
 #include "Zend/zend_operators.h"
 
@@ -86,8 +87,10 @@ void zephir_concat_self(zval **left, zval *right TSRMLS_DC){
 		}
 	}
 
+	SEPARATE_ZVAL_IF_NOT_REF(left);
+
 	length = Z_STRLEN_PP(left) + Z_STRLEN_P(right);
-	Z_STRVAL_PP(left) = erealloc(Z_STRVAL_PP(left), length + 1);
+	Z_STRVAL_PP(left) = str_erealloc(Z_STRVAL_PP(left), length + 1);
 
 	memcpy(Z_STRVAL_PP(left) + Z_STRLEN_PP(left), Z_STRVAL_P(right), Z_STRLEN_P(right));
 	Z_STRVAL_PP(left)[length] = 0;
@@ -130,8 +133,10 @@ void zephir_concat_self_str(zval **left, const char *right, int right_length TSR
 		}
 	}
 
+	SEPARATE_ZVAL_IF_NOT_REF(left);
+
 	length = Z_STRLEN_PP(left) + right_length;
-	Z_STRVAL_PP(left) = erealloc(Z_STRVAL_PP(left), length + 1);
+	Z_STRVAL_PP(left) = str_erealloc(Z_STRVAL_PP(left), length + 1);
 
 	memcpy(Z_STRVAL_PP(left) + Z_STRLEN_PP(left), right, right_length);
 	Z_STRVAL_PP(left)[length] = 0;
@@ -176,8 +181,11 @@ void zephir_concat_self_long(zval **left, const long right TSRMLS_DC) {
 	}
 
 	if (right_length > 0) {
+
+		SEPARATE_ZVAL_IF_NOT_REF(left);
+
 		length = Z_STRLEN_PP(left) + right_length;
-		Z_STRVAL_PP(left) = erealloc(Z_STRVAL_PP(left), length + 1);
+		Z_STRVAL_PP(left) = str_erealloc(Z_STRVAL_PP(left), length + 1);
 		memcpy(Z_STRVAL_PP(left) + Z_STRLEN_PP(left), right_char, right_length);
 		Z_STRVAL_PP(left)[length] = 0;
 		Z_STRLEN_PP(left) = length;
@@ -213,8 +221,10 @@ void zephir_concat_self_char(zval **left, unsigned char right TSRMLS_DC) {
 		}
 	}
 
+	SEPARATE_ZVAL_IF_NOT_REF(left);
+
 	Z_STRLEN_PP(left)++;
-	Z_STRVAL_PP(left) = erealloc(Z_STRVAL_PP(left), Z_STRLEN_PP(left) + 1);
+	Z_STRVAL_PP(left) = str_erealloc(Z_STRVAL_PP(left), Z_STRLEN_PP(left) + 1);
 	Z_STRVAL_PP(left)[Z_STRLEN_PP(left) - 1] = right;
 	Z_STRVAL_PP(left)[Z_STRLEN_PP(left)] = 0;
 	Z_TYPE_PP(left) = IS_STRING;
@@ -230,6 +240,7 @@ void zephir_concat_self_char(zval **left, unsigned char right TSRMLS_DC) {
 int zephir_compare_strict_string(zval *op1, const char *op2, int op2_length) {
 
 	switch (Z_TYPE_P(op1)) {
+
 		case IS_STRING:
 			if (!Z_STRLEN_P(op1) && !op2_length) {
 				return 1;
@@ -238,8 +249,10 @@ int zephir_compare_strict_string(zval *op1, const char *op2, int op2_length) {
 				return 0;
 			}
 			return !zend_binary_strcmp(Z_STRVAL_P(op1), Z_STRLEN_P(op1), op2, op2_length);
+
 		case IS_NULL:
 			return !zend_binary_strcmp("", 0, op2, op2_length);
+
 		case IS_BOOL:
 			if (!Z_BVAL_P(op1)) {
 				return !zend_binary_strcmp("0", strlen("0"), op2, op2_length);
@@ -353,7 +366,7 @@ int zephir_compare_strict_bool(zval *op1, zend_bool op2 TSRMLS_DC) {
 /**
  * Do add function keeping ref_count and is_ref
  */
-int zephir_add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) {
+int zephir_add_function_ex(zval *result, zval *op1, zval *op2 TSRMLS_DC) {
 	int status;
 	int ref_count = Z_REFCOUNT_P(result);
 	int is_ref = Z_ISREF_P(result);
@@ -448,9 +461,10 @@ long zephir_get_intval_ex(const zval *op) {
 		case IS_STRING: {
 			long long_value = 0;
 			double double_value = 0;
+			zend_uchar type;
 
 			ASSUME(Z_STRVAL_P(op) != NULL);
-			zend_uchar type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &long_value, &double_value, 0);
+			type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &long_value, &double_value, 0);
 			if (type == IS_LONG) {
 				return long_value;
 			}
@@ -737,3 +751,118 @@ int zephir_shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC){
 	return status;
 }
 
+/**
+ * Do safe divisions between two longs
+ */
+double zephir_safe_div_long_long(long op1, long op2 TSRMLS_DC) {
+	if (!op2) {
+		zend_error(E_WARNING, "Division by zero");
+		return 0;
+	}
+	return (double) op1 / (double) op2;
+}
+
+/**
+ * Do safe divisions between two long/double
+ */
+double zephir_safe_div_long_double(long op1, double op2 TSRMLS_DC) {
+	if (!op2) {
+		zend_error(E_WARNING, "Division by zero");
+		return 0;
+	}
+	return (double) op1 / op2;
+}
+
+/**
+ * Do safe divisions between two double/long
+ */
+double zephir_safe_div_double_long(double op1, long op2 TSRMLS_DC) {
+	if (!op2) {
+		zend_error(E_WARNING, "Division by zero");
+		return 0;
+	}
+	return op1 / (double) op2;
+}
+
+/**
+ * Do safe divisions between two doubles
+ */
+double zephir_safe_div_double_double(double op1, double op2 TSRMLS_DC) {
+	if (!op2) {
+		zend_error(E_WARNING, "Division by zero");
+		return 0;
+	}
+	return op1 / op2;
+}
+
+/**
+ * Do safe divisions between two zval/long
+ */
+double zephir_safe_div_zval_long(zval *op1, long op2 TSRMLS_DC) {
+	if (!op2) {
+		zend_error(E_WARNING, "Division by zero");
+		return 0;
+	}
+	switch (Z_TYPE_P(op1)) {
+		case IS_ARRAY:
+		case IS_OBJECT:
+		case IS_RESOURCE:
+			zend_error(E_WARNING, "Unsupported operand types");
+			break;
+	}
+	return ((double) zephir_get_numberval(op1)) / (double) op2;
+}
+
+/**
+ * Do safe divisions between two zval/double
+ */
+double zephir_safe_div_zval_double(zval *op1, double op2 TSRMLS_DC) {
+	if (!op2) {
+		zend_error(E_WARNING, "Division by zero");
+		return 0;
+	}
+	switch (Z_TYPE_P(op1)) {
+		case IS_ARRAY:
+		case IS_OBJECT:
+		case IS_RESOURCE:
+			zend_error(E_WARNING, "Unsupported operand types");
+			break;
+	}
+	return ((double) zephir_get_numberval(op1)) / op2;
+}
+
+/**
+ * Do safe divisions between two long/zval
+ */
+double zephir_safe_div_long_zval(long op1, zval *op2 TSRMLS_DC) {
+	if (!zephir_get_numberval(op2)) {
+		zend_error(E_WARNING, "Division by zero");
+		return 0;
+	}
+	switch (Z_TYPE_P(op2)) {
+		case IS_ARRAY:
+		case IS_OBJECT:
+		case IS_RESOURCE:
+			zend_error(E_WARNING, "Unsupported operand types");
+			break;
+	}
+	return (double) op1 / ((double) zephir_get_numberval(op2));
+}
+
+/**
+ * Do safe divisions between two double/zval
+ */
+double zephir_safe_div_double_zval(double op1, zval *op2 TSRMLS_DC) {
+	if (!zephir_get_numberval(op2)) {
+		zend_error(E_WARNING, "Division by zero");
+		return 0;
+	}
+	switch (Z_TYPE_P(op2)) {
+		case IS_ARRAY:
+		case IS_OBJECT:
+		case IS_RESOURCE:
+			zend_error(E_WARNING, "Unsupported operand types");
+			break;
+	}
+	return op1 / ((double) zephir_get_numberval(op2));
+}
