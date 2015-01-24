@@ -83,14 +83,14 @@ class Orientdb
 	 *
 	 * @param string serverUser Username to connect to the OrientDB server
 	 * @param string serverPass Password to connect to the OrientDB server
-	 * @return array
+	 * @return void
 	 */
-	public function Shutdown(string serverUser, string serverPass)
+	public function Shutdown(string serverUser, string serverPass) -> void
 	{
 		var resourceClass;
 		let resourceClass = new Shutdown(this);
 
-		return resourceClass->run(serverUser, serverPass);
+		resourceClass->run(serverUser, serverPass);
 	}
 
 	/**
@@ -98,14 +98,14 @@ class Orientdb
 	 *
 	 * @param string serverUser Username to connect to the OrientDB server
 	 * @param string serverPass Password to connect to the OrientDB server
-	 * @return array
+	 * @return void
 	 */
-	public function Connect(string serverUser, string serverPass)
+	public function Connect(string serverUser, string serverPass) -> void
 	{
 		var resourceClass;
 		let resourceClass = new Connect(this);
 
-		return resourceClass->run(serverUser, serverPass);
+		resourceClass->run(serverUser, serverPass);
 	}
 
 	/**
@@ -133,14 +133,14 @@ class Orientdb
 	 * @param string storageType Storage type of the new database: plocal|memory, "plocal" by default
 	 * @return array
 	 */
-	public function DBCreate(string dbName, string dbType = "document", string storageType = "plocal")
+	public function DBCreate(string dbName, string dbType = "document", string storageType = "plocal") -> void
 	{
 		this->canPerformServerOperation();
 
 		var resourceClass;
 		let resourceClass = new DBCreate(this);
 
-		return resourceClass->run(dbName, dbType, storageType);
+		resourceClass->run(dbName, dbType, storageType);
 	}
 
 	/**

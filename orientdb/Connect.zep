@@ -52,7 +52,7 @@ class Connect extends OperationAbstract
 
 		this->prepare();
 		this->execute();
-		let this->response = this->parseResponse();
+		this->parseResponse();
 
 		return this->response;
 	}

@@ -43,18 +43,16 @@ class Shutdown extends OperationAbstract
 	 * 
 	 * @param string serverUser Username to connect to the OrientDB server
 	 * @param string serverPass Password to connect to the OrientDB server
-	 * @return string
+	 * @return void
 	 */
-	public function run(string serverUser, string serverPass) -> string
+	public function run(string serverUser, string serverPass) -> void
 	{
 		let this->_serverUser = serverUser;
 		let this->_serverPass = serverPass;
 
 		this->prepare();
 		this->execute();
-		let this->response = this->parseResponse();
-
-		return this->response;
+		this->parseResponse();
 	}
 
 	/**
