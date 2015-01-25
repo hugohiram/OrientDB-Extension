@@ -22,6 +22,7 @@ use Orientdb\Exception\OrientdbException;
 class DBExist extends OperationAbstract
 {
 	protected _dbName;
+	protected _storageType;
 
 	/**
 	 * Orientdb\DBOpen constructor
@@ -41,11 +42,13 @@ class DBExist extends OperationAbstract
 	 * Main method to run the operation
 	 * 
 	 * @param string dbName      Name of the database to check
-	 * @return string
+	 * @param string storageType Storage type of the new database: plocal|memory
+	 * @return boolean
 	 */
-	public function run(string dbName) -> string
+	public function run(string dbName, string storageType) -> boolean
 	{
 		let this->_dbName = dbName;
+		let this->_storageType = storageType;
 
 		this->prepare();
 		this->execute();
@@ -66,8 +69,10 @@ class DBExist extends OperationAbstract
 		this->addByte(chr(this->operation));
 		this->addInt(this->transaction);
 
-		// database name
+		// database name (database-name:string)
 		this->addString(this->_dbName);
+		// (server-storage-type:string)
+		this->addString(this->_storageType);
 	}
 
 	/**
@@ -84,7 +89,6 @@ class DBExist extends OperationAbstract
 			let session = this->readInt(this->socket);
 			this->parent->setSessionServer(session);
 			let exists = this->readByte(this->socket);
-
 			switch ord(exists) {
 				case 1:
 					return true;

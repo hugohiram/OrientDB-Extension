@@ -161,16 +161,17 @@ class Orientdb
 	 * Check if database exists method
 	 *
 	 * @param string dbName Name of the database to check
-	 * @return array
+	 * @param string storageType Storage type of the new database: plocal|memory, "plocal" by default
+	 * @return boolean
 	 */
-	public function DBExist(string dbName)
+	public function DBExist(string dbName, string storageType = "plocal") -> boolean
 	{
 		this->canPerformServerOperation();
 
 		var resourceClass;
 		let resourceClass = new DBExist(this);
 
-		return resourceClass->run(dbName);
+		return resourceClass->run(dbName, storageType);
 	}
 
 	/**
