@@ -28,7 +28,7 @@ class Orientdb
 	const SERIALIZATION_BINARY	= "ORecordSerializerBinary";
 
 	public driverName = "PHP-Extension";
-	public driverVersion = "0.2";
+	public driverVersion = "0.3";
 	public protocolVersion = 27;
 	public clientId = null;
 	public serialization;
@@ -253,6 +253,21 @@ class Orientdb
 
 		var resourceClass;
 		let resourceClass = new DBSize(this);
+
+		return resourceClass->run();
+	}
+
+	/**
+	 * Database Count Records method
+	 *
+	 * @return array
+	 */
+	public function DBCountRecords()
+	{
+		this->canPerformDatabaseOperation();
+
+		var resourceClass;
+		let resourceClass = new DBCountRecords(this);
 
 		return resourceClass->run();
 	}

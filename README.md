@@ -29,6 +29,7 @@ Haven't tried in a PHP 5.3.x installation.
     cd OrientDB-Extension
     sudo su
     zephir build
+    cp ext/modules/orientdb.so /PATH-TO-PHP/share/modules/orientdb.so
     service apache2 restart
 
 ## Done ##
@@ -42,7 +43,8 @@ Haven't tried in a PHP 5.3.x installation.
 * DBDrop (REQUEST_DB_DROP)
 * DBList (REQUEST_DB_LIST)
 * Select (SynchQuery)
-* REQUEST_DB_SIZE (REQUEST_DB_SIZE)
+* DBSize (REQUEST_DB_SIZE)
+* DBCountRecords (REQUEST_DB_COUNTRECORDS)
 
 ## TODOs ##
 
@@ -50,7 +52,6 @@ Haven't tried in a PHP 5.3.x installation.
 * REQUEST_CONFIG_GET
 * REQUEST_CONFIG_SET
 * REQUEST_CONFIG_LIST
-* REQUEST_DB_COUNTRECORDS
 * REQUEST_DATACLUSTER_ADD
 * REQUEST_DATACLUSTER_DROP
 * REQUEST_DATACLUSTER_COUNT

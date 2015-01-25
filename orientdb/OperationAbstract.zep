@@ -33,6 +33,7 @@ class OperationAbstract
 	// Database (DB_OPEN Operations)
 	const REQUEST_DB_CLOSE 	= 5;
 	const REQUEST_DB_SIZE	= 8;
+	const REQUEST_DB_COUNTRECORDS = 9;
 	const REQUEST_DATACLUSTER_ADD	 = 10;
 	const REQUEST_DATACLUSTER_REMOVE = 11;
 	const REQUEST_DATACLUSTER_COUNT  = 12;
