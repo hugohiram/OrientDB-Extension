@@ -242,6 +242,21 @@ class Orientdb
 		return resourceClass->run(query, fetchplan);
 	}
 
+	/**
+	 * Database Size method
+	 *
+	 * @return array
+	 */
+	public function DBSize()
+	{
+		this->canPerformDatabaseOperation();
+
+		var resourceClass;
+		let resourceClass = new DBSize(this);
+
+		return resourceClass->run();
+	}
+
 
 	/////////////////////////////////////////
 	//       Orientdb custom methods       //
