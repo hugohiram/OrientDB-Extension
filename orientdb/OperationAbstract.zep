@@ -120,7 +120,7 @@ class OperationAbstract
 	 * @param object socket Object of the socket
 	 * @return int
 	 */
-	protected function readShort(socket)
+	protected function readShort(socket) -> int
 	{
 		var data;
 		var shortValue;
@@ -171,7 +171,7 @@ class OperationAbstract
 	 * @param object socket Object of the socket
 	 * @return string
 	 */
-	protected function readBytes(socket)
+	protected function readBytes(socket) -> string|null
 	{
 		var size, data;
 		let size = this->readInt(socket);
@@ -194,7 +194,7 @@ class OperationAbstract
 	 * @param object socket Object of the socket
 	 * @return string
 	 */
-	protected function readString(socket)
+	protected function readString(socket) -> string|null
 	{
 		var data;
 		var size;
@@ -218,7 +218,7 @@ class OperationAbstract
 	 * @param object socket Object of the socket
 	 * @return uint
 	 */
-	protected function readLong(socket)
+	protected function readLong(socket) -> uint
 	{
 		var hi, low;
 
@@ -258,7 +258,7 @@ class OperationAbstract
 	 * @param boolean store    store value on message, true by default
 	 * @return string
 	 */
-	protected function addInt(int intValue, store = true)
+	protected function addInt(int intValue, store = true) -> string
 	{
 		var data;
 		let data = pack("N", intValue);
@@ -277,7 +277,7 @@ class OperationAbstract
 	 * @param boolean store    store value on message, true by default
 	 * @return string
 	 */
-	protected function addByte(string byteValue, store = true)
+	protected function addByte(string byteValue, store = true) -> string
 	{
 		if (store) {
 			//let this->requestMessage .= byteValue;
@@ -294,7 +294,7 @@ class OperationAbstract
 	 * @param boolean store    store value on message, true by default
 	 * @return string
 	 */
-	protected function addBytes(string bytesValue, boolean store = true)
+	protected function addBytes(string bytesValue, boolean store = true) -> string
 	{
 		var data;
 		let data = this->addInt(strlen(bytesValue), store);
@@ -314,7 +314,7 @@ class OperationAbstract
 	 * @param boolean store    store value on message, true by default
 	 * @return string
 	 */
-	protected function addString(string stringValue, boolean store = true)
+	protected function addString(string stringValue, boolean store = true) -> string
 	{
 		var data;
 		let data = this->addInt(strlen(stringValue), store);
