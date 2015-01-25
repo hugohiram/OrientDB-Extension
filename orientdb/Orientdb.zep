@@ -28,13 +28,14 @@ class Orientdb
 	const SERIALIZATION_BINARY	= "ORecordSerializerBinary";
 
 	public driverName = "PHP-Extension";
-	public driverVersion = "0.1";
-	public protocolVersion = 15;
+	public driverVersion = "0.2";
+	public protocolVersion = 27;
 	public clientId = null;
 	public serialization;
 
 	protected sessionDB;
 	protected sessionServer;
+	protected sessionToken;
 
 	public error;
 	public errno;
@@ -74,6 +75,17 @@ class Orientdb
 		}
 	}
 
+	/**
+	 * Set protocol version
+	 *
+	 * @param integer protocolVersion version of the protocol
+	 * @return void
+	 */
+	public function setProtocolVersion(int protocolVersion) -> void
+	{
+		let this->protocolVersion = protocolVersion;
+	}
+
 	/////////////////////////////////////////
 	//     Server (CONNECT Operations)     //
 	/////////////////////////////////////////
@@ -96,33 +108,35 @@ class Orientdb
 	/**
 	 * Database Connect method
 	 *
-	 * @param string serverUser Username to connect to the OrientDB server
-	 * @param string serverPass Password to connect to the OrientDB server
+	 * @param string  serverUser Username to connect to the OrientDB server
+	 * @param string  serverPass Password to connect to the OrientDB server
+	 * @param boolean stateless  Set a stateless connection using a token based session
 	 * @return void
 	 */
-	public function Connect(string serverUser, string serverPass) -> void
+	public function Connect(string serverUser, string serverPass, boolean stateless = false) -> void
 	{
 		var resourceClass;
 		let resourceClass = new Connect(this);
 
-		resourceClass->run(serverUser, serverPass);
+		resourceClass->run(serverUser, serverPass, stateless);
 	}
 
 	/**
 	 * Database Open method
 	 *
-	 * @param string dbName Name of the database to open
-	 * @param string dbType Type of the database: document|graph
-	 * @param string dbUser Username for the database
-	 * @param string dbPass Password of the user
+	 * @param string  dbName     Name of the database to open
+	 * @param string  dbType     Type of the database: document|graph
+	 * @param string  dbUser     Username for the database
+	 * @param string  dbPass     Password of the user
+	 * @param boolean stateless  Set a stateless connection using a token based session
 	 * @return array
 	 */
-	public function DBOpen(string dbName, string dbType, string dbUser, string dbPass)
+	public function DBOpen(string dbName, string dbType, string dbUser, string dbPass, boolean stateless = false)
 	{
 		var resourceClass;
 		let resourceClass = new DBOpen(this);
 
-		return resourceClass->run(dbName, dbType, dbUser, dbPass);
+		return resourceClass->run(dbName, dbType, dbUser, dbPass, stateless);
 	}
 
 	/**
@@ -253,6 +267,16 @@ class Orientdb
 	}
 
 	/**
+	 * Set session of server
+	 *
+	 * @param string session Session ID
+	 */
+	public function setSessionToken(string token) -> void
+	{
+		let this->sessionToken = token;
+	}
+
+	/**
 	 * Get the session of DB
 	 *
 	 * @return string
@@ -270,6 +294,16 @@ class Orientdb
 	public function getSessionServer() -> string
 	{
 		return this->sessionServer;
+	}
+
+	/**
+	 * Get token of server
+	 *
+	 * @return string
+	 */
+	public function getSessionToken() -> string
+	{
+		return this->sessionToken;
 	}
 
 	/**

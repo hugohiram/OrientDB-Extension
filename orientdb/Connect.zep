@@ -23,6 +23,7 @@ class Connect extends OperationAbstract
 {
 	protected _serverUser;
 	protected _serverPass;
+	protected _stateless;
 
 	/**
 	 * Orientdb\DBOpen constructor
@@ -41,14 +42,16 @@ class Connect extends OperationAbstract
 	/**
 	 * Main method to run the operation
 	 * 
-	 * @param string serverUser Username to connect to the OrientDB server
-	 * @param string serverPass Password to connect to the OrientDB server
+	 * @param string  serverUser Username to connect to the OrientDB server
+	 * @param string  serverPass Password to connect to the OrientDB server
+	 * @param boolean stateless  Set a stateless connection using a token based session
 	 * @return string
 	 */
-	public function run(string serverUser, string serverPass) -> string
+	public function run(string serverUser, string serverPass, boolean stateless) -> string
 	{
 		let this->_serverUser = serverUser;
 		let this->_serverPass = serverPass;
+		let this->_stateless  = stateless;
 
 		this->prepare();
 		this->execute();
@@ -68,15 +71,27 @@ class Connect extends OperationAbstract
 		this->addByte(chr(this->operation));
 		this->addInt(this->transaction);
 
+		// (driver-name:string)
 		this->addString(this->parent->driverName);
+		// (driver-version:string)
 		this->addString(this->parent->driverVersion);
+		// (protocol-version:short)
 		this->addShort(this->parent->protocolVersion);
+		// (client-id:string)
 		this->addString(this->parent->clientId);
-		//this->addString(this->parent->serialization);
 
-		// server's username
+		if (this->parent->protocolVersion > 21) {
+			// (serialization-impl:string)
+			this->addString(this->parent->serialization);
+			if (this->parent->protocolVersion > 26) {
+				// (token-session:boolean)
+				this->addByte((int)this->_stateless);
+			}
+		}
+
+		// (user-name:string)
 		this->addString(this->_serverUser);
-		// server's password
+		// (user-password:string)
 		this->addString(this->_serverPass);
 	}
 
@@ -87,7 +102,7 @@ class Connect extends OperationAbstract
 	 */
 	protected function parseResponse() -> void
 	{
-		var protocol, status, session, transaction;
+		var protocol, status, session, transaction, token;
 
 		let protocol = this->readShort(this->socket);
 		let status = this->readByte(this->socket);
@@ -96,6 +111,11 @@ class Connect extends OperationAbstract
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 			let session = this->readInt(this->socket);
 			this->parent->setSessionServer(session);
+
+			if (this->parent->protocolVersion > 26) {
+				let token = this->readString(this->socket);
+				this->parent->setSessionToken(token);
+			}
 		}
 		else {
 			if (status == (chr(OperationAbstract::STATUS_ERROR))) {

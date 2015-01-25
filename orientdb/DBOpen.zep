@@ -25,6 +25,7 @@ class DBOpen extends OperationAbstract
 	protected _dbType;
 	protected _dbUser;
 	protected _dbPass;
+	protected _stateless;
 
 	/**
 	 * Orientdb\DBOpen constructor
@@ -47,14 +48,16 @@ class DBOpen extends OperationAbstract
 	 * @param string dbType Type of the database: document|graph
 	 * @param string dbUser Username for the database
 	 * @param string dbPass Password of the user
+	 * @param boolean stateless  Set a stateless connection using a token based session
 	 * @return string
 	 */
-	public function run(string dbName, string dbType, string dbUser, string dbPass) -> string
+	public function run(string dbName, string dbType, string dbUser, string dbPass, boolean stateless) -> string
 	{
 		let this->_dbName = dbName;
 		let this->_dbType = dbType;
 		let this->_dbUser = dbUser;
 		let this->_dbPass = dbPass;
+		let this->_stateless = stateless;
 
 		this->prepare();
 		this->execute();
@@ -74,19 +77,31 @@ class DBOpen extends OperationAbstract
 		this->addByte(chr(this->operation));
 		this->addInt(this->transaction);
 
+		// (driver-name:string)
 		this->addString(this->parent->driverName);
+		// (driver-version:string)
 		this->addString(this->parent->driverVersion);
+		// (protocol-version:short)
 		this->addShort(this->parent->protocolVersion);
+		// (client-id:string)
 		this->addString(this->parent->clientId);
-		//this->addString(this->parent->serialization);
 
-		// db name
+		if (this->parent->protocolVersion > 21) {
+			// (serialization-impl:string)
+			this->addString(this->parent->serialization);
+			if (this->parent->protocolVersion > 26) {
+				// (token-session:boolean)
+				this->addByte((int)this->_stateless);
+			}
+		}
+
+		// db name (database-name:string)
 		this->addString(this->_dbName);
-		// db type
+		// db type (database-type:string)
 		this->addString(this->_dbType);
-		// db user
+		// db user (user-name:string)
 		this->addString(this->_dbUser);
-		// db pass
+		// db pass (user-password:string)
 		this->addString(this->_dbPass);
 	}
 
@@ -106,6 +121,7 @@ class DBOpen extends OperationAbstract
 		var clusters;
 		var config;
 		var release;
+		var token;
 
 		//list(protocol, status, transaction) = this->getBasicResponse();
 		let protocol = this->readShort(this->socket);
@@ -115,17 +131,23 @@ class DBOpen extends OperationAbstract
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 			let session = this->readInt(this->socket);
 			this->parent->setSessionDB(session);
+
+			if (this->parent->protocolVersion > 26) {
+				let token = this->readString(this->socket);
+				this->parent->setSessionToken(token);
+			}
+
 			let numClusters = this->readShort(this->socket);
 			let clusters = [];
 			var pos;
 			for pos in range(1, numClusters) {
 				let cluster = [
 					"name": this->readString(this->socket),
-					"id": this->readShort(this->socket),
-					"type": this->readString(this->socket),
-					"datasegmentid": this->readShort(this->socket)
+					"id":   this->readShort(this->socket),
+					"type": (this->parent->protocolVersion < 24)? this->readString(this->socket) : null,
+					"datasegmentid": (this->parent->protocolVersion < 24)? this->readShort(this->socket)  : null
 				];
-				
+
 				let clusters[] = cluster;
 			}
 
