@@ -22,7 +22,7 @@ use Orientdb\Exception\OrientdbException;
 class DBDrop extends OperationAbstract
 {
 	protected _dbName;
-	protected _dbType;
+	protected _storageType;
 
 	/**
 	 * Orientdb\DBDrop constructor
@@ -41,14 +41,14 @@ class DBDrop extends OperationAbstract
 	/**
 	 * Main method to run the operation
 	 * 
-	 * @param string dbName Name of the database to drop
-	 * @param string dbType Type of the database to drop: plocal|memory
+	 * @param string dbName      Name of the database to drop
+	 * @param string storageType Storage type of the database to drop: plocal|memory
 	 * @return string
 	 */
-	public function run(string dbName, string dbType = "plocal") -> string
+	public function run(string dbName, string storageType = "plocal") -> string
 	{
 		let this->_dbName = dbName;
-		let this->_dbType = dbType;
+		let this->_storageType = storageType;
 
 		this->prepare();
 		this->execute();
@@ -72,7 +72,7 @@ class DBDrop extends OperationAbstract
 		// database name
 		this->addString(this->_dbName);
 		// database type
-		this->addString(this->_dbType);
+		this->addString(this->_storageType);
 	}
 
 	/**
