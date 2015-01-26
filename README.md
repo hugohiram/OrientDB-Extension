@@ -325,7 +325,7 @@ if (!empty($records)) {
 ##### (REQUEST_DB_SIZE) #####
 Asks for the size of a database in the OrientDB Server instance.
 ```php
-DBSize() : array
+DBSize() : int
 ```
 #### Parameters
 no parameters needed
@@ -338,11 +338,28 @@ $size = $orient->DBSize();
 ```
 ---
 
+### DBCountRecords ###
+##### (REQUEST_DB_COUNTRECORDS) #####
+Asks for the number of records in a database in the OrientDB Server instance.
+```php
+DBCountRecords() : int
+```
+#### Parameters
+no parameters needed
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+$count = $orient->DBCountRecords();
+```
+---
+
 ### DataclusterAdd ###
 ##### (REQUEST_DATACLUSTER_ADD) #####
 Add a new data cluster.
 ```php
-DataclusterAdd() : array
+DataclusterAdd() : int
 ```
 #### Parameters
 Parameter  | Description   |  Mandatory
@@ -355,15 +372,16 @@ Parameter  | Description   |  Mandatory
 ```php
 $orient = new Orientdb\Orientdb('localhost', 2424);
 $orient->DBOpen('test', 'document', 'admin', 'admin');
-$orient->DataclusterAdd("myCluster", 20);
+$cluster = $orient->DataclusterAdd("myCluster", 20);
 ```
 ---
 
 ### DataclusterDrop ###
-##### (REQUEST_DATACLUSTER_DROP) #####
+##### (REQUEST_DATACLUSTER_DROP
+) #####
 Remove a cluster.
 ```php
-DataclusterDrop() : array
+DataclusterDrop() : int
 ```
 #### Parameters
 Parameter  | Description   |  Mandatory
