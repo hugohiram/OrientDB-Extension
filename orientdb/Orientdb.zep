@@ -279,6 +279,8 @@ class Orientdb
 	/**
 	 * Datacluster Add method
 	 *
+	 * @param string name Name of the cluster to create
+	 * @param short  id   ID of the cluster
 	 * @return int
 	 */
 	public function DataclusterAdd(string name, int id) -> int
@@ -289,6 +291,22 @@ class Orientdb
 		let resourceClass = new DataclusterAdd(this);
 
 		return resourceClass->run(name, id);
+	}
+
+	/**
+	 * Datacluster Drop method
+	 *
+	 * @param short number Number of the cluster to delete
+	 * @return int
+	 */
+	public function DataclusterDrop(int number) -> int
+	{
+		this->canPerformDatabaseOperation();
+
+		var resourceClass;
+		let resourceClass = new DataclusterDrop(this);
+
+		return resourceClass->run(number);
 	}
 
 
