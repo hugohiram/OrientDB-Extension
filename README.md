@@ -123,22 +123,19 @@ catch(OrientdbException $e) {
 ```
 ---
 
-### Shutdown ###
-##### (REQUEST_SHUTDOWN) #####
-Shut down the server. Requires "shutdown" permission to be set in orientdb-server-config.xml file. Typically the credentials are those of the OrientDB server administrator. This is not the same as the admin user for individual databases.
-```php
-Shutdown(string username, string password) : void
-```
-#### Parameters
-Parameter  | Description
----------- | -------------
-**_username_** | Username for the OrientDB Server
-**_password_** | Password for the OrientDB Server
+### Protocol version ###
+To se the protocol version, use the `setProtocolVersion` method. The latest version supported is v.26
 
 #### Example
 ```php
-$orient = new Orientdb\Orientdb('localhost', 2424);
-$orient->Shutdown('admin', 'admin');
+try{
+    $orient = new Orientdb\Orientdb('locaho...', 2424);
+    $orient->setProtocolVersion(24);
+}
+catch(OrientdbException $e) {
+    var_dump($e->getMessage());
+    var_dump($e->getCode());
+}
 ```
 ---
 
@@ -146,13 +143,14 @@ $orient->Shutdown('admin', 'admin');
 ##### (REQUEST_CONNECT) #####
 This is the first operation requested by the client when it needs to work with the server instance. It returns the session id of the client.
 ```php
-Shutdown(string username, string password) : void
+connect(string username, string password [,boolean stateless = false]) : void
 ```
 #### Parameters
-Parameter  | Description
----------- | -------------
-**_username_** | Username for the OrientDB Server
-**_password_** | Password for the OrientDB Server
+Parameter  | Description   | Mandatory
+---------- | ------------- | -----------
+**_username_** | Username for the OrientDB Server | yes
+**_password_** | Password for the OrientDB Server | yes
+**_stateless_** | Type of session, true for stateless, false or empty for stateful | no
 
 #### Example
 ```php
@@ -165,20 +163,40 @@ $orient->Connect('admin', 'admin');
 ##### (REQUEST_DB_OPEN) #####
 This is the first operation the client should call. It opens a database on the remote OrientDB Server. Returnds an array with the database configuration and clusters.
 ```php
-DBOpen(string dbName, string dbType, string dbUser, string dbPass) : array
+DBOpen(string dbName, string dbType, string dbUser, string dbPass [, boolean stateless = false]) : array
 ```
 #### Parameters
-Parameter  | Description
----------- | -------------
-**_dbName_** | Name of the database
-**_dbType_** | Type of the database: document-graph, only document is supported at the moment
-**_dbUser_** | for the database
-**_dbPass_** | Password for the database
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_dbName_** | Name of the database | yes
+**_dbType_** | Type of the database: document-graph, only document is supported at the moment | yes
+**_dbUser_** | for the database | yes
+**_dbPass_** | Password for the database | yes
+**_stateless_** | Type of session, true for stateless, false or empty for stateful | no
 
 #### Example
 ```php
 $orient = new Orientdb\Orientdb('localhost', 2424);
 $orient->DBOpen('test', 'document', 'admin', 'admin');
+```
+---
+
+### Shutdown ###
+##### (REQUEST_SHUTDOWN) #####
+Shut down the server. Requires "shutdown" permission to be set in orientdb-server-config.xml file and to be connected to the server. Typically the credentials are those of the OrientDB server administrator. This is not the same as the admin user for individual databases.
+```php
+Shutdown(string username, string password) : void
+```
+#### Parameters
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_username_** | Username for the OrientDB Server | yes
+**_password_** | Password for the OrientDB Server | yes
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->Shutdown('admin', 'admin');
 ```
 ---
 
@@ -189,11 +207,11 @@ Creates a database in the remote OrientDB server instance
 DBCreate(string dbName [, string dbType = "document" [, string storageType = "plocal" ]] ) : void
 ```
 #### Parameters
-Parameter  | Description
----------- | -------------
-**_dbName_** | Name of the database
-**_dbType_** | Type of the database: document-graph, _document_ by default, only document is supported at the moment
-**_storageType_** | Storage type: plocal-memory, _plocal_ by default
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_dbName_** | Name of the database | yes
+**_dbType_** | Type of the database: document-graph, _document_ by default, only document is supported at the moment | no
+**_storageType_** | Storage type: plocal-memory, _plocal_ by default | no
 
 #### Example
 ```php
@@ -207,7 +225,7 @@ $orient->DBCreate('test', 'document', 'plocal');
 ##### (REQUEST_DB_CLOSE) #####
 Closes the database and the network connection to the OrientDB Server instance. No return is expected.
 ```php
-DBClose() : void
+DBClose( ) : void
 ```
 #### Parameters
 no parameters needed
@@ -224,12 +242,13 @@ $orient->DBClose();
 ##### (REQUEST_DB_EXIST) #####
 Asks if a database exists in the OrientDB Server instance, _true_ if exists, _false_ if doesn't exists.
 ```php
-DBExist(string dbName) : boolean
+DBExist(string dbName [, string storageType = "plocal" ]) : boolean
 ```
 #### Parameters
-Parameter  | Description
----------- | -------------
-**_dbName_** | Name of the database to check
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_dbName_** | Name of the database to check | yes
+**_storageType_** | Storage type: plocal-memory, _plocal_ by default | no
 
 #### Example
 ```php
@@ -246,10 +265,10 @@ Removes a database from the OrientDB Server instance.
 DBDrop(string dbName [, string dbType = "plocal" ] ) : void
 ```
 #### Parameters
-Parameter  | Description
----------- | -------------
-**_dbName_** | Name of the database to delete
-**_dbType_** | Type of the database: plocal-memory, _plocal_ by default
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_dbName_** | Name of the database to delete | yes
+**_dbType_** | Type of the database: plocal-memory, _plocal_ by default | no
 
 #### Example
 ```php
@@ -283,10 +302,10 @@ Executes a _command_ operation of type _OSQLSynchQuery_
 Select(string query [, string fetchplan = "*:0" ] ) : array
 ```
 #### Parameters
-Parameter  | Description
----------- | -------------
-**_query_** | Query to execute
-**_fetchplan_** | Fetchplan, none by default: "*:0"
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_query_** | Query to execute | yes
+**_fetchplan_** | Fetchplan, none by default: "*:0" | no
 
 #### Example
 ```php
@@ -299,6 +318,64 @@ if (!empty($records)) {
 		var_dump($data);
 	}
 }
+```
+---
+
+### DBSize ###
+##### (REQUEST_DB_SIZE) #####
+Asks for the size of a database in the OrientDB Server instance.
+```php
+DBSize() : array
+```
+#### Parameters
+no parameters needed
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+$size = $orient->DBSize(); 
+```
+---
+
+### DataclusterAdd ###
+##### (REQUEST_DATACLUSTER_ADD) #####
+Add a new data cluster.
+```php
+DataclusterAdd() : array
+```
+#### Parameters
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_name_** | Name of the new cluster | yes
+**_id_** | ID of the cluster | yes
+
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+$orient->DataclusterAdd("myCluster", 20);
+```
+---
+
+### DataclusterDrop ###
+##### (REQUEST_DATACLUSTER_DROP) #####
+Remove a cluster.
+```php
+DataclusterDrop() : array
+```
+#### Parameters
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_number_** | Number of the cluster | yes
+
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+$cluster = $orient->DataclusterDrop(20);
 ```
 ---
 
