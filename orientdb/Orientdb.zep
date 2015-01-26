@@ -276,6 +276,21 @@ class Orientdb
 		return resourceClass->run();
 	}
 
+	/**
+	 * Datacluster Add method
+	 *
+	 * @return int
+	 */
+	public function DataclusterAdd(string name, int id) -> int
+	{
+		this->canPerformDatabaseOperation();
+
+		var resourceClass;
+		let resourceClass = new DataclusterAdd(this);
+
+		return resourceClass->run(name, id);
+	}
+
 
 	/////////////////////////////////////////
 	//       Orientdb custom methods       //
