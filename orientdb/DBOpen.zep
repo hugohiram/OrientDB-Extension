@@ -91,7 +91,7 @@ class DBOpen extends OperationAbstract
 			this->addString(this->parent->serialization);
 			if (this->parent->protocolVersion > 26) {
 				// (token-session:boolean)
-				this->addByte((int)this->_stateless);
+				this->addByte(this->_stateless);
 			}
 		}
 
@@ -132,13 +132,14 @@ class DBOpen extends OperationAbstract
 			let session = this->readInt(this->socket);
 			this->parent->setSessionDB(session);
 
-			if (this->parent->protocolVersion > 26) {
-				let token = this->readString(this->socket);
+			if (this->parent->protocolVersion > 26 && this->_stateless == true) {
+				let token = this->readBytes(this->socket);
 				this->parent->setSessionToken(token);
 			}
 
 			let numClusters = this->readShort(this->socket);
 			let clusters = [];
+
 			var pos;
 			for pos in range(1, numClusters) {
 				let cluster = [
@@ -158,12 +159,7 @@ class DBOpen extends OperationAbstract
 		}
 		else {
 			if (status == (chr(OperationAbstract::STATUS_ERROR))) {
-				let session = this->readInt(this->socket);
-				this->parent->setSessionServer(session);
-
 				this->handleException();
-
-				throw new OrientdbException("Could not open database, maybe it doesn't exist, try the DBExist operation", 400);
 			}
 			else {
 				throw new OrientdbException("unknown error", 400);
