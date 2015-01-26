@@ -67,6 +67,7 @@ class OperationAbstract
 	protected requestMessage;
 	protected arguments;
 	protected transaction;
+	protected session;
 	protected response;
 
 	/**
@@ -352,6 +353,7 @@ class OperationAbstract
 		*/
 	}
 
+
 	/**
 	 * Get exception class and exception message from socket and throws new exception
 	 *
@@ -359,19 +361,26 @@ class OperationAbstract
 	 */
 	protected function handleException() -> void
 	{
+
 		// [(1)(exception-class:string)(exception-message:string)]*(0)(serialized-exception:bytes)
+		// (1)(com.orientechnologies.orient.core.exception.OStorageException)(Can't open the storage 'demo')(0)
+		// (1)(com.orientechnologies.orient.core.exception.OStorageException)(Can't open the storage 'demo')(1)(com.orientechnologies.orient.core.exception.OStorageException)(File not found)(0)
 		var exceptionStatus;
+		var exceptionClass;
+		var exceptionMessage = "";
+
 		let exceptionStatus = this->readByte(this->socket);
-		if (exceptionStatus == (chr(self::EXCEPTION_FOUND))) {
-			var exceptionClass;
-			var exceptionMessage;
+		while (exceptionStatus == (chr(self::EXCEPTION_FOUND))) {
 			let exceptionClass = this->readString(this->socket);
 			let exceptionMessage = this->readString(this->socket);
 
-			throw new OrientdbException(exceptionMessage, 400);
-			//let exceptionStatus = this->readByte(this->socket);
-			//if (exceptionStatus == (chr(OperationAbstract::EXCEPTION_FOUND))) {
-			//}
+			let exceptionStatus = this->readByte(this->socket);
+			if (exceptionStatus == (chr(OperationAbstract::EXCEPTION_FOUND))) {
+				let exceptionMessage .= "; ";
+			}
 		}
+
+		throw new OrientdbException(exceptionMessage, 400);
 	}
+
 }
