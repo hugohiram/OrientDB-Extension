@@ -29,7 +29,7 @@ class Orientdb
 
 	public driverName = "PHP-Extension";
 	public driverVersion = "0.3";
-	public protocolVersion = 27;
+	public protocolVersion = 26;
 	public clientId = null;
 	public serialization;
 
@@ -83,6 +83,10 @@ class Orientdb
 	 */
 	public function setProtocolVersion(int protocolVersion) -> void
 	{
+		if (protocolVersion > this->protocolVersion) {
+			throw new OrientdbException("version " . protocolVersion . " is not supported yet, max version supported is version " . (string)this->protocolVersion, 400);
+		}
+
 		let this->protocolVersion = protocolVersion;
 	}
 
@@ -245,9 +249,9 @@ class Orientdb
 	/**
 	 * Database Size method
 	 *
-	 * @return array
+	 * @return int
 	 */
-	public function DBSize()
+	public function DBSize() -> int
 	{
 		this->canPerformDatabaseOperation();
 
@@ -260,9 +264,9 @@ class Orientdb
 	/**
 	 * Database Count Records method
 	 *
-	 * @return array
+	 * @return long
 	 */
-	public function DBCountRecords()
+	public function DBCountRecords() -> long
 	{
 		this->canPerformDatabaseOperation();
 
