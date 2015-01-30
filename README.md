@@ -359,7 +359,7 @@ $count = $orient->DBCountRecords();
 ##### (REQUEST_DATACLUSTER_ADD) #####
 Add a new data cluster.
 ```php
-DataclusterAdd() : int
+DataclusterAdd(string name, int id) : int
 ```
 #### Parameters
 Parameter  | Description   |  Mandatory
@@ -377,11 +377,10 @@ $cluster = $orient->DataclusterAdd("myCluster", 20);
 ---
 
 ### DataclusterDrop ###
-##### (REQUEST_DATACLUSTER_DROP
-) #####
+##### (REQUEST_DATACLUSTER_DROP) #####
 Remove a cluster.
 ```php
-DataclusterDrop() : int
+DataclusterDrop(int number) : int
 ```
 #### Parameters
 Parameter  | Description   |  Mandatory
@@ -394,6 +393,28 @@ Parameter  | Description   |  Mandatory
 $orient = new Orientdb\Orientdb('localhost', 2424);
 $orient->DBOpen('test', 'document', 'admin', 'admin');
 $cluster = $orient->DataclusterDrop(20);
+```
+---
+
+### DataclusterCount ###
+##### (REQUEST_DATACLUSTER_COUNT) #####
+Returns the number of records in one or more clusters.
+```php
+DataclusterCount( array clusters [, boolean tomstone = false ] ) : long
+```
+#### Parameters
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_clusters_** | Array with the numbers of the clusters | yes
+**_tombstone_** | whether deleted records should be taken in account, autosharded storage only | no
+
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+$clusters = array(10);
+$records = $orient->DataclusterCount($clusters);
 ```
 ---
 

@@ -309,6 +309,23 @@ class Orientdb
 		return resourceClass->run(number);
 	}
 
+	/**
+	 * Datacluster Count method
+	 *
+	 * @param array   clusters  Array with the numbers of the clusters
+	 * @param boolean tombstone whether deleted records should be taken in account autosharded storage only
+	 * @return long
+	 */
+	public function DataclusterCount(array clusters, boolean tombstone = false) -> long
+	{
+		this->canPerformDatabaseOperation();
+
+		var resourceClass;
+		let resourceClass = new DataclusterCount(this);
+
+		return resourceClass->run(clusters, tombstone);
+	}
+
 
 	/////////////////////////////////////////
 	//       Orientdb custom methods       //
