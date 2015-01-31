@@ -99,7 +99,7 @@ class DBReload extends OperationAbstract
 			return ["numClusters":numClusters, "clusters":clusters];
 		}
 		else {
-			throw new OrientdbException("could not check the database", 400);
+			this->handleException();
 		}
 
 		return [];
