@@ -42,7 +42,7 @@ Haven't tried in a PHP 5.3.x installation.
 * DBExist (REQUEST_DB_EXIST)
 * DBDrop (REQUEST_DB_DROP)
 * DBList (REQUEST_DB_LIST)
-* Select (SynchQuery)
+* Query (Command - SynchQuery)
 * DBSize (REQUEST_DB_SIZE)
 * DBCountRecords (REQUEST_DB_COUNTRECORDS)
 * DBReload (REQUEST_DB_RELOAD)
@@ -161,7 +161,7 @@ $orient->Connect('admin', 'admin');
 
 ### DBOpen ###
 ##### (REQUEST_DB_OPEN) #####
-This is the first operation the client should call. It opens a database on the remote OrientDB Server. Returnds an array with the database configuration and clusters.
+This is the first operation the client should call. It opens a database on the remote OrientDB Server. Returns an array with the database configuration and clusters.
 ```php
 DBOpen(string dbName, string dbType, string dbUser, string dbPass [, boolean stateless = false]) : array
 ```
@@ -211,7 +211,7 @@ Parameter  | Description   |  Mandatory
 ---------- | ------------- | -----------
 **_dbName_** | Name of the database | yes
 **_dbType_** | Type of the database: document-graph, _document_ by default, only document is supported at the moment | no
-**_storageType_** | Storage type: plocal-memory, _plocal_ by default | no
+**_storageType_** | Storage type: plocal or memory, _plocal_ by default | no
 
 #### Example
 ```php
@@ -268,13 +268,13 @@ DBDrop(string dbName [, string dbType = "plocal" ] ) : void
 Parameter  | Description   |  Mandatory
 ---------- | ------------- | -----------
 **_dbName_** | Name of the database to delete | yes
-**_dbType_** | Type of the database: plocal-memory, _plocal_ by default | no
+**_dbType_** | Type of the database: plocal or memory, _plocal_ by default | no
 
 #### Example
 ```php
 $orient = new Orientdb\Orientdb('localhost', 2424);
 $orient->Connect('admin', 'admin');
-$orient->DBDrop('test', 'plocal');	
+$orient->DBDrop('test');	
 ```
 ---
 
@@ -295,23 +295,24 @@ $databases = $orient->DBList();
 ```
 ---
 
-### Select ###
+### Query ###
 ##### (REQUEST_COMMAND - OSQLSynchQuery) #####
 Executes a _command_ operation of type _OSQLSynchQuery_
 ```php
-Select(string query [, string fetchplan = "*:0" ] ) : array
+Query(string query [, string fetchplan = "*:0" ] ) : array
 ```
 #### Parameters
 Parameter  | Description   |  Mandatory
 ---------- | ------------- | -----------
 **_query_** | Query to execute | yes
+**_limit_** | Limit of results in the query, no limit by default | no
 **_fetchplan_** | Fetchplan, none by default: "*:0" | no
 
 #### Example
 ```php
 $orient = new Orientdb\Orientdb('localhost', 2424);
 $orient->DBOpen('test', 'document', 'admin', 'admin');
-$records = $orient->select('select from basic');
+$records = $orient->query('select from basic');
 if (!empty($records)) {
 	foreach ($records as $record) {
 	    $data = $record->data;

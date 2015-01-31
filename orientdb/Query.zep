@@ -18,12 +18,13 @@ namespace Orientdb;
  * @package Operation
  * @subpackage Command
  */
-class Select extends OperationAbstract
+class Query extends OperationAbstract
 {
 	//const OPERATION = 3;
 	//const COMMAND = 2;
 
 	protected _query;
+	protected _limit;
 	protected _fetchplan;
 
 	const MODE = "s"; //synchronous mode
@@ -47,12 +48,15 @@ class Select extends OperationAbstract
 	/**
 	 * Main method to run the operation
 	 * 
-	 * @param string query Query to execute
+	 * @param string query     Query to execute
+	 * @param int    limit     Limit on the query, by default limit from query
+	 * @param string fetchplan Fetchplan, no fetchplan by default
 	 * @return string
 	 */
-	public function run(string query, string fetchplan = "*:0")
+	public function run(string query, int limit = -1, string fetchplan = "*:0")
 	{
 		let this->_query = query;
+		let this->_limit = limit;
 		let this->_fetchplan = fetchplan;
 
 		this->prepare();
@@ -80,7 +84,7 @@ class Select extends OperationAbstract
 		let commandPayload = "";
 		let commandPayload .= this->addBytes(self::CLASSNAME, false);
 		let commandPayload .= this->addBytes(trim(this->_query), false);
-		let commandPayload .= pack("N", -1);
+		let commandPayload .= pack("N", this->_limit);
 		let commandPayload .= this->addBytes(this->_fetchplan, false);
 		let commandPayload .= pack("N", 0);
 

@@ -245,20 +245,21 @@ class Orientdb
 	}
 
 	/**
-	 * Select method
+	 * Select query method
 	 *
-	 * @param string dbName Name of the database to open
-	 * @param string dbType Type of the database: document|graph
+	 * @param string query     Select query to execute
+	 * @param int    limit     Limit on the query, by default limit from query
+	 * @param string fetchplan Fetchplan, no fetchplan by default
 	 * @return array
 	 */
-	public function select(string query, string fetchplan = "*:0")
+	public function query(string query, int limit = -1, string fetchplan = "*:0")
 	{
 		this->canPerformDatabaseOperation();
 
 		var resourceClass;
-		let resourceClass = new Select(this);
+		let resourceClass = new Query(this);
 
-		return resourceClass->run(query, fetchplan);
+		return resourceClass->run(query, limit, fetchplan);
 	}
 
 	/**
