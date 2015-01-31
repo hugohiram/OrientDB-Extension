@@ -179,6 +179,21 @@ class Orientdb
 	}
 
 	/**
+	 * Database Reload method
+	 *
+	 * @return array
+	 */
+	public function DBReload()
+	{
+		this->canPerformDatabaseOperation();
+
+		var resourceClass;
+		let resourceClass = new DBReload(this);
+
+		return resourceClass->run();
+	}
+
+	/**
 	 * Retrieve list of databases
 	 *
 	 * @return array

@@ -45,8 +45,10 @@ Haven't tried in a PHP 5.3.x installation.
 * Select (SynchQuery)
 * DBSize (REQUEST_DB_SIZE)
 * DBCountRecords (REQUEST_DB_COUNTRECORDS)
+* DBReload (REQUEST_DB_RELOAD)
 * DataclusterAdd (REQUEST_DATACLUSTER_ADD)
 * DataclusterDrop (REQUEST_DATACLUSTER_DROP)
+* DataclusterCount (REQUEST_DATACLUSTER_COUNT)
 
 ## TODOs ##
 
@@ -54,7 +56,6 @@ Haven't tried in a PHP 5.3.x installation.
 * REQUEST_CONFIG_GET
 * REQUEST_CONFIG_SET
 * REQUEST_CONFIG_LIST
-* REQUEST_DATACLUSTER_COUNT
 * REQUEST_DATACLUSTER_DATARANGE
 * REQUEST_DATACLUSTER_COPY
 * REQUEST_DATACLUSTER_LH_CLUSTER_IS_USED
@@ -71,7 +72,6 @@ Haven't tried in a PHP 5.3.x installation.
 * REQUEST_COMMAND
 * REQUEST_POSITIONS_CEILING
 * REQUEST_TX_COMMIT
-* REQUEST_DB_RELOAD
 * REQUEST_PUSH_RECORD
 * REQUEST_PUSH_DISTRIB_CONFIG
 * REQUEST_DB_COPY
@@ -355,6 +355,23 @@ $count = $orient->DBCountRecords();
 ```
 ---
 
+### DBReload ###
+##### (REQUEST_DB_RELOAD) #####
+Reloads database information. Available since 1.0rc4.
+```php
+DBReload( ) : void
+```
+#### Parameters
+no parameters needed
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+$config = $orient->DBReload();
+```
+---
+
 ### DataclusterAdd ###
 ##### (REQUEST_DATACLUSTER_ADD) #####
 Add a new data cluster.
@@ -400,7 +417,7 @@ $cluster = $orient->DataclusterDrop(20);
 ##### (REQUEST_DATACLUSTER_COUNT) #####
 Returns the number of records in one or more clusters.
 ```php
-DataclusterCount( array clusters [, boolean tomstone = false ] ) : long
+DataclusterCount( array clusters [, boolean tombstone = false ] ) : long
 ```
 #### Parameters
 Parameter  | Description   |  Mandatory
