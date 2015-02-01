@@ -42,8 +42,8 @@ Haven't tried in a PHP 5.3.x installation.
 * DBExist (REQUEST_DB_EXIST)
 * DBDrop (REQUEST_DB_DROP)
 * DBList (REQUEST_DB_LIST)
-* Query (Command - OSQLSynchQuery)
-* Command (Command - OCommandSQL)
+* Query (REQUEST_COMMAND - OSQLSynchQuery)
+* Command (REQUEST_COMMAND - OCommandSQL)
 * DBSize (REQUEST_DB_SIZE)
 * DBCountRecords (REQUEST_DB_COUNTRECORDS)
 * DBReload (REQUEST_DB_RELOAD)
@@ -70,7 +70,6 @@ Haven't tried in a PHP 5.3.x installation.
 * REQUEST_POSITIONS_LOWER
 * REQUEST_RECORD_CLEAN_OUT
 * REQUEST_POSITIONS_FLOOR
-* REQUEST_COMMAND
 * REQUEST_POSITIONS_CEILING
 * REQUEST_TX_COMMIT
 * REQUEST_PUSH_RECORD
@@ -298,7 +297,7 @@ $databases = $orient->DBList();
 
 ### Query ###
 ##### (REQUEST_COMMAND - OSQLSynchQuery) #####
-Executes a _command_ operation of type _OSQLSynchQuery_
+Executes a _command_ operation of type _OSQLSynchQuery_ (**_select_**)
 ```php
 query(string query [, int int = -1, [, string fetchplan = "*:0" ]] ) : array
 ```
@@ -341,10 +340,10 @@ $orient->DBOpen('test', 'document', 'admin', 'admin');
 $result = $orient->command('create class simple');
 $result = $orient->command('create property simple.name string');
 $result = $orient->command('create property simple.year integer');
-$result = $orient->command('insert into simple set name = "my name", year = "2015"'' );
+$result = $orient->command('insert into simple set name = "my name", year = "2015"');
 $result = $orient->command('drop class simple');
 
-//$result = $orient->command( "traverse extlist from #10:1" );
+//$result = $orient->command( "traverse extlist from #10:1");
 
 ```
 ---
