@@ -28,7 +28,7 @@ class Orientdb
 	const SERIALIZATION_BINARY	= "ORecordSerializerBinary";
 
 	public driverName = "PHP-Extension";
-	public driverVersion = "0.4";
+	public driverVersion = "0.5";
 	public protocolVersion = 26;
 	public clientId = null;
 	public serialization;
@@ -309,6 +309,41 @@ class Orientdb
 		let resourceClass = new DBCountRecords(this);
 
 		return resourceClass->run();
+	}
+
+	/**
+	 * Database Freeze method
+	 *
+	 * @param string dbName Name of the database to Freeze
+	 * @param string storageType Storage type of the database: plocal|local|memory, "plocal" by default
+	 * @return array
+	 */
+	public function DBFreeze(string dbName, string storageType = "plocal")
+	{
+		this->canPerformServerOperation();
+
+		var resourceClass;
+		let resourceClass = new DBFreeze(this);
+
+		return resourceClass->run(dbName, storageType);
+	}
+
+	/**
+	 * Database Release method
+	 *
+	 * @param string dbName Name of the database to Release
+	 * @param string storageType Storage type of the database: plocal|local|memory, "plocal" by default
+	 * @return array
+	 */
+	public function DBRelease(string dbName, string storageType = "plocal")
+	{
+		this->canPerformServerOperation();
+		this->canPerformDatabaseOperation();
+
+		var resourceClass;
+		let resourceClass = new DBRelease(this);
+
+		return resourceClass->run(dbName, storageType);
 	}
 
 	/**

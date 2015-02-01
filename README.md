@@ -47,6 +47,8 @@ Haven't tried in a PHP 5.3.x installation.
 * DBSize (REQUEST_DB_SIZE)
 * DBCountRecords (REQUEST_DB_COUNTRECORDS)
 * DBReload (REQUEST_DB_RELOAD)
+* DBFreeze (REQUEST_DB_FREEZE)
+* DBRelease (REQUEST_DB_RELEASE)
 * DataclusterAdd (REQUEST_DATACLUSTER_ADD)
 * DataclusterDrop (REQUEST_DATACLUSTER_DROP)
 * DataclusterCount (REQUEST_DATACLUSTER_COUNT)
@@ -78,8 +80,6 @@ Haven't tried in a PHP 5.3.x installation.
 * REQUEST_REPLICATION
 * REQUEST_CLUSTER
 * REQUEST_DB_TRANSFER
-* REQUEST_DB_FREEZE
-* REQUEST_DB_RELEASE
 * REQUEST_DATACLUSTER_FREEZE
 * REQUEST_DATACLUSTER_RELEASE
 * REQUEST_CREATE_SBTREE_BONSAI
@@ -400,6 +400,50 @@ no parameters needed
 $orient = new Orientdb\Orientdb('localhost', 2424);
 $orient->DBOpen('test', 'document', 'admin', 'admin');
 $config = $orient->DBReload();
+```
+---
+
+### DBFreeze ###
+##### (REQUEST_DB_FREEZE) #####
+Flushes all cached content to the disk storage and allows to perform only read commands. 
+Database will be "frozen" till release database command will not been executed.
+```php
+DBFreeze( string dbName [, string storageType = "plocal" ] ) : long
+```
+#### Parameters
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_dbName_** | Name of the database | yes
+**_storageType_** | Type of storage: plocal or memory | no
+
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$result = $orient->Connect($serverUser, $serverPass);
+$freezed = $orient->DBFreeze("test", "plocal");
+```
+---
+
+### DBRelease ###
+##### (REQUEST_DB_RELEASE) #####
+Switches database from "frozen" state to normal mode.
+```php
+DataclusterCount( string dbName [, string storageType = "plocal" ] ) : long
+```
+#### Parameters
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_dbName_** | Name of the database | yes
+**_storageType_** | Type of storage: plocal or memory | no
+
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$result = $orient->Connect($serverUser, $serverPass);
+$freezed = $orient->DBFreeze("test", "plocal");
+$released = $orient->DBRelease("test", "plocal");
 ```
 ---
 
