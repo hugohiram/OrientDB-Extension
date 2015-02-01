@@ -42,7 +42,8 @@ Haven't tried in a PHP 5.3.x installation.
 * DBExist (REQUEST_DB_EXIST)
 * DBDrop (REQUEST_DB_DROP)
 * DBList (REQUEST_DB_LIST)
-* Query (Command - SynchQuery)
+* Query (Command - OSQLSynchQuery)
+* Command (Command - OCommandSQL)
 * DBSize (REQUEST_DB_SIZE)
 * DBCountRecords (REQUEST_DB_COUNTRECORDS)
 * DBReload (REQUEST_DB_RELOAD)
@@ -299,7 +300,7 @@ $databases = $orient->DBList();
 ##### (REQUEST_COMMAND - OSQLSynchQuery) #####
 Executes a _command_ operation of type _OSQLSynchQuery_
 ```php
-Query(string query [, string fetchplan = "*:0" ] ) : array
+query(string query [, int int = -1, [, string fetchplan = "*:0" ]] ) : array
 ```
 #### Parameters
 Parameter  | Description   |  Mandatory
@@ -319,6 +320,32 @@ if (!empty($records)) {
 		var_dump($data);
 	}
 }
+```
+---
+
+### Command ###
+##### (REQUEST_COMMAND - OCommandSQL) #####
+Executes a _command_ operation of type _OCommandSQL_
+```php
+command(string query) : array
+```
+#### Parameters
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_query_** | Query to execute | yes
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+$result = $orient->command('create class simple');
+$result = $orient->command('create property simple.name string');
+$result = $orient->command('create property simple.year integer');
+$result = $orient->command('insert into simple set name = "my name", year = "2015"'' );
+$result = $orient->command('drop class simple');
+
+//$result = $orient->command( "traverse extlist from #10:1" );
+
 ```
 ---
 

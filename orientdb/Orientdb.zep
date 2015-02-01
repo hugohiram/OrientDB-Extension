@@ -263,6 +263,22 @@ class Orientdb
 	}
 
 	/**
+	 * Command method
+	 *
+	 * @param string query SQL Command to execute
+	 * @return array
+	 */
+	public function command(string query)
+	{
+		this->canPerformDatabaseOperation();
+
+		var resourceClass;
+		let resourceClass = new Command(this);
+
+		return resourceClass->run(query);
+	}
+
+	/**
 	 * Database Size method
 	 *
 	 * @return int
