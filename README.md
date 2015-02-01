@@ -317,6 +317,9 @@ if (!empty($records)) {
 	foreach ($records as $record) {
 	    $data = $record->data;
 		var_dump($data);
+        // the content is not parsed until one of the properties is called:
+        $data->name;
+        var_dump($data);
 	}
 }
 ```
