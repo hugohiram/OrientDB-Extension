@@ -58,9 +58,9 @@ class DBList extends OperationAbstract
 	protected function prepare() -> void
 	{
 		this->resetRequest();
-		let this->transaction = this->parent->getSessionServer();
+		let this->session = this->parent->getSession();
 		this->addByte(chr(this->operation));
-		this->addInt(this->transaction);
+		this->addInt(this->session);
 	}
 
 	/**
@@ -70,12 +70,11 @@ class DBList extends OperationAbstract
 	 */
 	protected function parseResponse() ->array
 	{
-		var session, status;
-		var content, decoder, databases;
+		var status, content, decoder, databases;
 
 		let status = this->readByte(this->socket);
-		let session = this->readInt(this->socket);
-		this->parent->setSessionServer(session);
+		let this->session = this->readInt(this->socket);
+		this->parent->setSession(this->session);
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 			let content = this->readString(this->socket);

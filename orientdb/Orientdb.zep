@@ -28,20 +28,21 @@ class Orientdb
 	const SERIALIZATION_BINARY	= "ORecordSerializerBinary";
 
 	public driverName = "PHP-Extension";
-	public driverVersion = "0.3";
+	public driverVersion = "0.4";
 	public protocolVersion = 26;
 	public clientId = null;
 	public serialization;
 
-	protected sessionDB;
-	protected sessionServer;
-	protected sessionToken;
+	protected session;
+	protected token;
+
+	public isDbOpen;
+	public isConnected;
 
 	public error;
 	public errno;
 	public errstr;
 
-	public transaction;
 	public socket;
 	
 	/**
@@ -54,6 +55,7 @@ class Orientdb
 	public function __construct(string host, int port = 2424, string serialization = "csv")
 	{
 		let this->error = false;
+		let this->session = -1;
 
 		//@TODO: autoloading
 		//spl_autoload_register([this, "autoload"]);
@@ -61,13 +63,14 @@ class Orientdb
 		let this->socket = new OrientDBSocket(host, port);
 		if empty this->socket {
 			let this->error = true;
-			let this->errno = "Could not open socket";
-			let this->errstr = 500;
-			throw new OrientdbException(this->errno, this->errstr);
+			let this->errstr = "Could not open socket";
+			let this->errno = 500;
+			throw new OrientdbException(this->errstr, this->errno);
 		}
 
 		switch serialization {
 			case "binary": // only CSV supported
+				throw new OrientdbException("Serielization of type: " . serialization . ", is not supported yet.", 400);
 			case "csv":
 			default:
 				let this->serialization = self::SERIALIZATION_CSV;
@@ -364,13 +367,13 @@ class Orientdb
 	/////////////////////////////////////////
 
 	/**
-	 * Set session of DB
+	 * Set session
 	 *
 	 * @param string session Session ID
 	 */
-	public function setSessionDB(string session) -> void
+	public function setSession(string session) -> void
 	{
-		let this->sessionDB = session;
+		let this->session = session;
 	}
 
 	/**
@@ -378,19 +381,9 @@ class Orientdb
 	 *
 	 * @param string session Session ID
 	 */
-	public function setSessionServer(string session) -> void
+	public function setToken(string token) -> void
 	{
-		let this->sessionServer = session;
-	}
-
-	/**
-	 * Set session of server
-	 *
-	 * @param string session Session ID
-	 */
-	public function setSessionToken(string token) -> void
-	{
-		let this->sessionToken = token;
+		let this->token = token;
 	}
 
 	/**
@@ -398,19 +391,9 @@ class Orientdb
 	 *
 	 * @return string
 	 */
-	public function getSessionDB() -> string
+	public function getSession() -> string
 	{
-		return this->sessionDB;
-	}
-
-	/**
-	 * Get session of server
-	 *
-	 * @return string
-	 */
-	public function getSessionServer() -> string
-	{
-		return this->sessionServer;
+		return this->session;
 	}
 
 	/**
@@ -418,9 +401,30 @@ class Orientdb
 	 *
 	 * @return string
 	 */
-	public function getSessionToken() -> string
+	public function getToken() -> string
 	{
-		return this->sessionToken;
+		return this->token;
+	}
+
+	/**
+	 * set status of server connection
+	 *
+	 * @return void
+	 */
+	public function setConnectStatus(boolean status) -> void
+	{
+		let this->isConnected = status;
+	}
+
+	/**
+	 * set status of database
+	 *
+	 * @return void
+	 */
+	public function setDbStatus(boolean status) -> void
+	{
+		let this->isDbOpen = status;
+		let this->isConnected = false;
 	}
 
 	/**
@@ -441,9 +445,7 @@ class Orientdb
 	 */
 	private function canPerformDatabaseOperation() -> void
 	{
-		var transaction;
-		let transaction = this->getSessionDB();
-		if empty transaction {
+		if (this->isDbOpen != true) {
 			throw new OrientdbException("Cannot perform the '" . this->GetCallingMethodName() . "' operation if not connected to a database");
 		}
 	}
@@ -455,9 +457,7 @@ class Orientdb
 	 */
 	private function canPerformServerOperation() -> void
 	{
-		var transaction;
-		let transaction = this->getSessionServer();
-		if empty transaction {
+		if (this->isConnected != true) {
 			throw new OrientdbException("Cannot perform the '" . this->GetCallingMethodName() . "' operation if not connected to a server");
 		}
 	}

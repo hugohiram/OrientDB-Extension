@@ -58,8 +58,8 @@ class RequestCommand extends OperationAbstract
 		
 		this->addByte(chr(this->operation));
 
-		let this->transaction = this->parent->getSessionDB();
-		this->addInt(this->transaction);
+		let this->session = this->parent->getSession();
+		this->addInt(this->session);
 
 		this->setCommandPayload();
 	}
@@ -85,8 +85,8 @@ class RequestCommand extends OperationAbstract
 		var recordsCount, record, records, resultType;
 
 		let status = this->readByte(this->socket);
-		let this->transaction = this->readInt(this->socket);
-		this->parent->setSessionDB(this->transaction);
+		let this->session = this->readInt(this->socket);
+		this->parent->setSession(this->session);
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 			let resultType = this->readByte(this->socket);
@@ -127,12 +127,16 @@ class RequestCommand extends OperationAbstract
 
 				case "n":
 					// Null
+					this->readByte(this->socket);
 					let result =  true;
 					break;
 
 				case "a":
 					// Something other
 					let result = this->readString(this->socket);
+					if (result == "true" || result == "false") {
+						let result = (result == "true")? true : false;
+					}
 					this->readByte(this->socket);
 					break;
 

@@ -37,7 +37,7 @@ class DBOpen extends OperationAbstract
 		//echo __CLASS__;
 		let this->parent = parent;
 		let this->socket = parent->socket;
-		let this->transaction = -1;
+		let this->session = this->parent->getSession();
 		let this->operation = OperationAbstract::REQUEST_DB_OPEN;
 	}
 
@@ -75,7 +75,7 @@ class DBOpen extends OperationAbstract
 	{
 		this->resetRequest();
 		this->addByte(chr(this->operation));
-		this->addInt(this->transaction);
+		this->addInt(this->session);
 
 		// (driver-name:string)
 		this->addString(this->parent->driverName);
@@ -91,7 +91,7 @@ class DBOpen extends OperationAbstract
 			this->addString(this->parent->serialization);
 			if (this->parent->protocolVersion > 26) {
 				// (token-session:boolean)
-				this->addByte(this->_stateless);
+				this->addBoolean(this->_stateless);
 			}
 		}
 
@@ -112,34 +112,32 @@ class DBOpen extends OperationAbstract
 	 */
 	protected function parseResponse() -> array
 	{
-		var protocol;
-		var status;
-		var transaction;
-		var session;
-		var numClusters;
-		var cluster;
-		var clusters;
-		var config;
-		var release;
-		var token;
+		var status, transaction, token;
+		var numClusters, cluster, clusters, config, release;
 
-		//list(protocol, status, transaction) = this->getBasicResponse();
-		let protocol = this->readShort(this->socket);
+		if (this->session < 0) {
+			var protocol;
+			let protocol = this->readShort(this->socket);
+			if (protocol < this->parent->protocolVersion) {
+				throw new OrientdbException("Database Server does not support protocol version " . protocol . ", max version allowed is v.". (string)protocol, 400);
+			}
+		}
+
 		let status = this->readByte(this->socket);
 		let transaction = this->readInt(this->socket);
+		let this->session = this->readInt(this->socket);
+		this->parent->setSession(this->session);
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
-			let session = this->readInt(this->socket);
-			this->parent->setSessionDB(session);
-
-			if (this->parent->protocolVersion > 26 && this->_stateless == true) {
+			if (this->parent->protocolVersion > 26) {
 				let token = this->readBytes(this->socket);
-				this->parent->setSessionToken(token);
+				if !empty token {
+					this->parent->setToken(token);
+				}
 			}
 
 			let numClusters = this->readShort(this->socket);
 			let clusters = [];
-
 			var pos;
 			for pos in range(1, numClusters) {
 				let cluster = [
@@ -154,6 +152,8 @@ class DBOpen extends OperationAbstract
 
 			let config = this->readBytes(this->socket);
 			let release = this->readString(this->socket);
+
+			this->parent->setDbStatus(true);
 
 			return ["numClusters":numClusters, "clusters":clusters, "config":config, "release":release];
 		}

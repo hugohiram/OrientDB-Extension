@@ -61,8 +61,8 @@ class DBReload extends OperationAbstract
 		this->resetRequest();
 		this->addByte(chr(this->operation));
 
-		let this->transaction = this->parent->getSessionDB();
-		this->addInt(this->transaction);
+		let this->session = this->parent->getSession();
+		this->addInt(this->session);
 	}
 
 	/**
@@ -76,11 +76,11 @@ class DBReload extends OperationAbstract
 		var numClusters, cluster, clusters;
 
 		let status = this->readByte(this->socket);
+		let session = this->readInt(this->socket);
+		this->parent->setSession(session);
+
 		//if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 		if (ord(status) == OperationAbstract::STATUS_SUCCESS) {
-			let session = this->readInt(this->socket);
-			this->parent->setSessionDB(session);
-
 			let numClusters = this->readShort(this->socket);
 			let clusters = [];
 

@@ -58,10 +58,10 @@ class DBCountRecords extends OperationAbstract
 	protected function prepare() -> void
 	{
 		this->resetRequest();
-		let this->transaction = this->parent->getSessionDB();
+		let this->session = this->parent->getSession();
 
 		this->addByte(chr(this->operation));
-		this->addInt(this->transaction);
+		this->addInt(this->session);
 	}
 
 	/**
@@ -71,12 +71,12 @@ class DBCountRecords extends OperationAbstract
 	 */
 	protected function parseResponse() -> long
 	{
-		var session, status, count;
+		var status, count;
 
 		let status = this->readByte(this->socket);
+		let this->session = this->readInt(this->socket);
+		this->parent->setSession(this->session);
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
-			let session = this->readInt(this->socket);
-			this->parent->setSessionServer(session);
 			let count = this->readLong(this->socket);
 			return count;
 		}

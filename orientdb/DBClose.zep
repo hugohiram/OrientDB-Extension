@@ -30,7 +30,7 @@ class DBClose extends OperationAbstract
 		//echo __CLASS__;
 		let this->parent = parent;
 		let this->socket = parent->socket;
-		let this->transaction = -1;
+		let this->session = this->parent->getSession();
 		let this->operation = OperationAbstract::REQUEST_DB_OPEN;
 	}
 
@@ -57,6 +57,7 @@ class DBClose extends OperationAbstract
 	{
 		this->resetRequest();
 		this->addByte(chr(this->operation));
+		this->addInt(this->session);
 	}
 
 	/**
@@ -66,7 +67,7 @@ class DBClose extends OperationAbstract
 	 */
 	protected function parseResponse()
 	{
-		this->parent->setSessionDB(null);
+		this->parent->setDbStatus(false);
 
 		return true;
 	}

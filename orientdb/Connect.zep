@@ -35,7 +35,7 @@ class Connect extends OperationAbstract
 		//echo __CLASS__;
 		let this->parent = parent;
 		let this->socket = parent->socket;
-		let this->transaction = -1;
+		let this->session = this->parent->getSession();
 		let this->operation = OperationAbstract::REQUEST_CONNECT;
 	}
 
@@ -69,7 +69,7 @@ class Connect extends OperationAbstract
 	{
 		this->resetRequest();
 		this->addByte(chr(this->operation));
-		this->addInt(this->transaction);
+		this->addInt(this->session);
 
 		// (driver-name:string)
 		this->addString(this->parent->driverName);
@@ -85,7 +85,7 @@ class Connect extends OperationAbstract
 			this->addString(this->parent->serialization);
 			if (this->parent->protocolVersion > 26) {
 				// (token-session:boolean)
-				this->addByte((int)this->_stateless);
+				this->addBoolean(this->_stateless);
 			}
 		}
 
@@ -102,20 +102,28 @@ class Connect extends OperationAbstract
 	 */
 	protected function parseResponse() -> void
 	{
-		var protocol, status, session, transaction, token;
+		var protocol, status, transaction, token;
 
-		let protocol = this->readShort(this->socket);
+		if (this->session <= 0) {
+			let protocol = this->readShort(this->socket);
+			if (protocol < this->parent->protocolVersion) {
+				throw new OrientdbException("Database Server does not support protocol version " . protocol . ", max version allowed is v.". (string)protocol, 400);
+			}
+		}
 		let status = this->readByte(this->socket);
 		let transaction = this->readInt(this->socket);
+		let this->session = this->readInt(this->socket);
+		this->parent->setSession(this->session);
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
-			let session = this->readInt(this->socket);
-			this->parent->setSessionServer(session);
-
 			if (this->parent->protocolVersion > 26) {
-				let token = this->readString(this->socket);
-				this->parent->setSessionToken(token);
+				let token = this->readBytes(this->socket);
+				if !empty token {
+					this->parent->setToken(token);
+				}
 			}
+
+			this->parent->setConnectStatus(true);
 		}
 		else {
 			if (status == (chr(OperationAbstract::STATUS_ERROR))) {

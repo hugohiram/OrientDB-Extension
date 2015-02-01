@@ -51,6 +51,8 @@ class OperationAbstract
 	const REQUEST_CONFIG_SET  = 71;
 	const REQUEST_CONFIG_LIST = 72;
 	const REQUEST_DB_RELOAD   = 73;
+	const REQUEST_DB_FREEZE   = 94;
+	const REQUEST_DB_RELEASE  = 95;
 
 	// Status
 	const STATUS_SUCCESS = 0x00;
@@ -66,7 +68,7 @@ class OperationAbstract
 	protected operation;
 	protected requestMessage;
 	protected arguments;
-	protected transaction;
+	//protected transaction;
 	protected session;
 	protected response;
 
@@ -216,6 +218,20 @@ class OperationAbstract
 	}
 
 	/**
+	 * Read "boolean" data from socket
+	 *
+	 * @param object socket Object of the socket
+	 * @return boolean
+	 */
+	protected function readBoolean(socket) -> boolean
+	{
+		var data;
+		let data = this->readRaw(socket, 1);
+
+		return (boolean)ord(data);
+	}
+
+	/**
 	 * Read "long" data from socket
 	 *
 	 * @param object socket Object of the socket
@@ -328,6 +344,24 @@ class OperationAbstract
 		}
 
 		return data;
+	}
+
+	/**
+	 * Add "boolean" data to sockets message
+	 *
+	 * @param string  booleanValue value to add
+	 * @param boolean store        store value on message, true by default
+	 * @return string
+	 */
+	protected function addBoolean(string booleanValue, store = true) -> string
+	{
+		var boolVal;
+		let boolVal = pack("C", booleanValue);
+		if (store) {
+			let this->requestMessage = this->requestMessage . boolVal;
+		}
+
+		return boolVal;
 	}
 
 	protected function getBasicResponse()

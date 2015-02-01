@@ -60,7 +60,7 @@ class DBSize extends OperationAbstract
 		this->resetRequest();
 		
 		this->addByte(chr(this->operation));
-		this->addInt(this->parent->getSessionDB());
+		this->addInt(this->parent->getSession());
 	}
 
 	/**
@@ -70,11 +70,11 @@ class DBSize extends OperationAbstract
 	 */
 	protected function parseResponse() -> long
 	{
-		var session, status, size;
+		var status, size;
 
 		let status = this->readByte(this->socket);
-		let session = this->readInt(this->socket);
-		this->parent->setSessionServer(session);
+		let this->session = this->readInt(this->socket);
+		this->parent->setSession(this->session);
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 			let size = this->readLong(this->socket);

@@ -51,7 +51,7 @@ class DataclusterCount extends OperationAbstract
 	{
 		let this->_clusters = clusters;
 		let this->_count = count(clusters);
-		let this->_tombstones = "false";
+		let this->_tombstones = false;
 
 		if (this->_count == 0) {
 			throw new OrientdbException("Array cannot be empty", 400);
@@ -74,10 +74,10 @@ class DataclusterCount extends OperationAbstract
 		var cluster;
 
 		this->resetRequest();
-		let this->transaction = this->parent->getSessionDB();
 
 		this->addByte(chr(this->operation));
-		this->addInt(this->transaction);
+		let this->session = this->parent->getSession();
+		this->addInt(this->session);
 
 		// (cluster-count:short)
 		this->addShort(this->_count);
@@ -88,7 +88,7 @@ class DataclusterCount extends OperationAbstract
 		}
 
 		// (count-tombstones:byte)
-		this->addByte(this->_tombstones);
+		this->addBoolean(this->_tombstones);
 	}
 
 	/**
@@ -98,11 +98,11 @@ class DataclusterCount extends OperationAbstract
 	 */
 	protected function parseResponse() -> long
 	{
-		var status, session, records;
+		var status, records;
 
 		let status = this->readByte(this->socket);
-		let session = this->readInt(this->socket);
-		this->parent->setSessionServer(session);
+		let this->session = this->readInt(this->socket);
+		this->parent->setSession(this->session);
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 			let records = this->readLong(this->socket);

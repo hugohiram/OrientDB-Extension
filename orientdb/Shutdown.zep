@@ -34,7 +34,7 @@ class Shutdown extends OperationAbstract
 		//echo __CLASS__;
 		let this->parent = parent;
 		let this->socket = parent->socket;
-		//let this->transaction = -1;
+		let this->session = this->parent->getSession();
 		let this->operation = OperationAbstract::REQUEST_SHUTDOWN;
 	}
 
@@ -63,9 +63,9 @@ class Shutdown extends OperationAbstract
 	protected function prepare() -> void
 	{
 		this->resetRequest();
-		let this->transaction = this->parent->getSessionServer();
+		let this->session = this->parent->getSession();
 		this->addByte(chr(this->operation));
-		this->addInt(this->transaction);
+		this->addInt(this->session);
 
 		// server's username
 		this->addString(this->_serverUser);
@@ -78,12 +78,13 @@ class Shutdown extends OperationAbstract
 	 */
 	protected function parseResponse() -> void
 	{
-		var status, session;
+		var status;
 
 		let status = this->readByte(this->socket);
+		let this->session = this->readInt(this->socket);
+		this->parent->setSession(this->session);
+
 		if (status == (chr(OperationAbstract::STATUS_ERROR))) {
-			let session = this->readInt(this->socket);
-			this->parent->setSessionServer(session);
 			this->handleException();
 		}
 		else {

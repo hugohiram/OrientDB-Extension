@@ -63,10 +63,10 @@ class DataclusterDrop extends OperationAbstract
 	protected function prepare() -> void
 	{
 		this->resetRequest();
-		let this->transaction = this->parent->getSessionDB();
+		let this->session = this->parent->getSession();
 
 		this->addByte(chr(this->operation));
-		this->addInt(this->transaction);
+		this->addInt(this->session);
 
 		// (cluster-number:short)
 		this->addShort(this->_clusterNumber);
@@ -79,14 +79,14 @@ class DataclusterDrop extends OperationAbstract
 	 */
 	protected function parseResponse() -> int
 	{
-		var session, status, deleted;
+		var status, deleted;
 
 		let status = this->readByte(this->socket);
-		let session = this->readInt(this->socket);
-		this->parent->setSessionServer(session);
+		let this->session = this->readInt(this->socket);
+		this->parent->setSession(this->session);
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
-			let deleted = this->readByte(this->socket);
+			let deleted = this->readBoolean(this->socket);
 			return deleted;
 		}
 		else {
