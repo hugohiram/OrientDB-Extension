@@ -299,7 +299,7 @@ $databases = $orient->DBList();
 ##### (REQUEST_COMMAND - OSQLSynchQuery) #####
 Executes a _command_ operation of type _OSQLSynchQuery_ (**_select_**)
 ```php
-query(string query [, int int = -1, [, string fetchplan = "*:0" ]] ) : array
+query(string query [, int limit = -1, [, string fetchplan = "*:0" ]] ) : array
 ```
 #### Parameters
 Parameter  | Description   |  Mandatory
@@ -327,7 +327,8 @@ if (!empty($records)) {
 
 ### Command ###
 ##### (REQUEST_COMMAND - OCommandSQL) #####
-Executes a _command_ operation of type _OCommandSQL_
+Executes a _command_ operation of type _OCommandSQL_ 
+(**_insert_**, **_update_**, **_delete_**, **_traverse_**)
 ```php
 command(string query) : array
 ```
