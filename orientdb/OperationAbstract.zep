@@ -457,9 +457,10 @@ class OperationAbstract
 	/**
 	 * Get exception class and exception message from socket and throws new exception
 	 *
+	 * @param int code Error code, 400 by default
 	 * @return void
 	 */
-	protected function handleException() -> void
+	protected function handleException(int code = 400) -> void
 	{
 
 		// [(1)(exception-class:string)(exception-message:string)]*(0)(serialized-exception:bytes)
@@ -480,7 +481,7 @@ class OperationAbstract
 			}
 		}
 
-		throw new OrientdbException(exceptionMessage, 400);
+		throw new OrientdbException(exceptionMessage, code);
 	}
 
 }
