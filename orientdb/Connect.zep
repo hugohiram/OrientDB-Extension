@@ -112,10 +112,11 @@ class Connect extends OperationAbstract
 		}
 		let status = this->readByte(this->socket);
 		let transaction = this->readInt(this->socket);
-		let this->session = this->readInt(this->socket);
-		this->parent->setSession(this->session);
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
+			let this->session = this->readInt(this->socket);
+			this->parent->setSession(this->session);
+
 			if (this->parent->protocolVersion > 26) {
 				let token = this->readBytes(this->socket);
 				if !empty token {
@@ -127,7 +128,7 @@ class Connect extends OperationAbstract
 		}
 		else {
 			if (status == (chr(OperationAbstract::STATUS_ERROR))) {
-				this->handleException();
+				this->handleException(401);
 			}
 			else {
 				throw new OrientdbException("unknown error", 400);
