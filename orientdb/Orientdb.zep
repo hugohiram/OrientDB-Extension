@@ -152,16 +152,16 @@ class Orientdb
 	 * @param string dbName      Name of the new database
 	 * @param string dbType      Type of the new database: document|graph, "document" by default
 	 * @param string storageType Storage type of the new database: plocal|memory, "plocal" by default
-	 * @return array
+	 * @return boolean
 	 */
-	public function DBCreate(string dbName, string dbType = "document", string storageType = "plocal") -> void
+	public function DBCreate(string dbName, string dbType = "document", string storageType = "plocal") -> boolean
 	{
 		this->canPerformServerOperation();
 
 		var resourceClass;
 		let resourceClass = new DBCreate(this);
 
-		resourceClass->run(dbName, dbType, storageType);
+		return resourceClass->run(dbName, dbType, storageType);
 	}
 
 	/**

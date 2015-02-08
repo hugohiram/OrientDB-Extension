@@ -208,7 +208,7 @@ $orient->Shutdown('admin', 'admin');
 ##### (REQUEST_DB_CREATE) #####
 Creates a database in the remote OrientDB server instance
 ```php
-DBCreate(string dbName [, string dbType = "document" [, string storageType = "plocal" ]] ) : void
+DBCreate(string dbName [, string dbType = "document" [, string storageType = "plocal" ]] ) : boolean
 ```
 #### Parameters
 Parameter  | Description   |  Mandatory
@@ -221,7 +221,8 @@ Parameter  | Description   |  Mandatory
 ```php
 $orient = new Orientdb\Orientdb('localhost', 2424);
 $orient->Connect('admin', 'admin');
-$orient->DBCreate('test', 'document', 'plocal');
+$created = $orient->DBCreate('test', 'document', 'plocal');
+var_dump($created);
 ```
 ---
 

@@ -46,9 +46,9 @@ class DBCreate extends OperationAbstract
 	 * @param string dbName      Name of the new database
 	 * @param string dbType      Type of the new database: document|graph, "document" by default
 	 * @param string storageType Storage type of the new database: plocal|memory, "plocal" by default
-	 * @return void
+	 * @return boolean
 	 */
-	public function run(string dbName, string dbType = "document", string storageType = "plocal") -> void
+	public function run(string dbName, string dbType = "document", string storageType = "plocal") -> boolean
 	{
 		let this->_dbName = dbName;
 		let this->_dbType = dbType;
@@ -56,7 +56,9 @@ class DBCreate extends OperationAbstract
 
 		this->prepare();
 		this->execute();
-		this->parseResponse();
+		let this->response = this->parseResponse();
+
+		return this->response;
 	}
 
 	/**
