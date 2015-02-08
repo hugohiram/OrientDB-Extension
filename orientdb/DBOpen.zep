@@ -125,10 +125,10 @@ class DBOpen extends OperationAbstract
 
 		let status = this->readByte(this->socket);
 		let transaction = this->readInt(this->socket);
-		let this->session = this->readInt(this->socket);
-		this->parent->setSession(this->session);
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
+			let this->session = this->readInt(this->socket);
+			this->parent->setSession(this->session);
 			if (this->parent->protocolVersion > 26) {
 				let token = this->readBytes(this->socket);
 				if !empty token {
