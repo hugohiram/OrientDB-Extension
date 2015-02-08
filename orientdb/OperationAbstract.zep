@@ -108,7 +108,7 @@ class OperationAbstract
 	 * Read Raw data from socket
 	 *
 	 * @param object socket Object of the socket
-	 * @param int    length length to read
+	 * @param int	length length to read
 	 * @return string
 	 */
 	protected function readRaw(socket, length) -> string
@@ -254,8 +254,8 @@ class OperationAbstract
 	/**
 	 * Add "short" data to sockets message
 	 *
-	 * @param int     shortValue value to add
-	 * @param boolean store      store value on message, true by default
+	 * @param int	 shortValue value to add
+	 * @param boolean store	  store value on message, true by default
 	 * @return string
 	 */
 	protected function addShort(int shortValue, store = true) -> string
@@ -273,8 +273,8 @@ class OperationAbstract
 	/**
 	 * Add "int" data to sockets message
 	 *
-	 * @param int     intValue value to add
-	 * @param boolean store    store value on message, true by default
+	 * @param int	 intValue value to add
+	 * @param boolean store	store value on message, true by default
 	 * @return string
 	 */
 	protected function addInt(int intValue, store = true) -> string
@@ -293,7 +293,7 @@ class OperationAbstract
 	 * Add "byte" data to sockets message
 	 *
 	 * @param string  intValue value to add
-	 * @param boolean store    store value on message, true by default
+	 * @param boolean store	store value on message, true by default
 	 * @return string
 	 */
 	protected function addByte(string byteValue, store = true) -> string
@@ -310,7 +310,7 @@ class OperationAbstract
 	 * Add "bytes" data to sockets message
 	 *
 	 * @param string  intValue value to add
-	 * @param boolean store    store value on message, true by default
+	 * @param boolean store	store value on message, true by default
 	 * @return string
 	 */
 	protected function addBytes(string bytesValue, boolean store = true) -> string
@@ -330,7 +330,7 @@ class OperationAbstract
 	 * Add "string" data to sockets message
 	 *
 	 * @param string  intValue value to add
-	 * @param boolean store    store value on message, true by default
+	 * @param boolean store	store value on message, true by default
 	 * @return string
 	 */
 	protected function addString(string stringValue, boolean store = true) -> string
@@ -347,10 +347,99 @@ class OperationAbstract
 	}
 
 	/**
+	 * Add "Long" data to sockets message
+	 * 
+	 * @TODO: 32 bits not supported yet, code commented due to some warnings
+	 *
+	 * @param long	longValue value to add
+	 * @param boolean store	 store value on message, true by default
+	 * @return string
+	 */
+	protected function addLong(long longValue, store = true) -> string
+	{
+		var data;
+		
+		if ( PHP_INT_SIZE > 4 ) {
+			let data = chr(longValue >> 56) . 
+				chr(longValue >> 48) .
+				chr(longValue >> 40) .
+				chr(longValue >> 32) .
+				chr(longValue >> 24) .
+				chr(longValue >> 16) .
+				chr(longValue >> 8) .
+				chr(longValue & 0xFF);
+
+		}
+		else {
+			/*
+			var isNegative, bitString, tmpValue;
+			var hi, lo, hiBin, loBin;
+
+			let bitString = "";
+			let tmpValue = longValue;
+			let isNegative = (tmpValue < 0 )? true : false;
+
+			if (function_exists("bcmod")) {
+				if (isNegative == true) {
+					let tmpValue = bcadd(tmpValue, "1");
+				}
+
+				while(tmpValue !== "0") {
+					let bitString = (string)abs( (int)bcmod( tmpValue, "2")) . bitString;
+					let tmpValue	 = bcdiv( tmpValue, "2" );
+				}
+			}
+			elseif (function_exists("gmp_mod")) {
+				if (isNegative == true) {
+					let tmpValue = gmp_strval(gmp_add(tmpValue, "1"));
+				}
+
+				while(tmpValue !== "0") {
+					let bitString = gmp_strval( gmp_abs( gmp_mod(tmpValue, "2"))) . bitString;
+					let tmpValue = gmp_strval( gmp_div_q( tmpValue, "2"));
+				}
+			}
+			else {
+				throw new OrientdbException("bcmod or gmp_mod are required", 500);
+			}
+
+			if (isNegative == true) {
+				int lenght, idx;
+				let lenght = strlen(bitString) - 1;
+
+				for idx in range(0, lenght) {
+					let bitString[idx] = (bitString[idx] == "1")? "0" : "1";
+				}
+			}
+
+			if (bitString != "" && isNegative == true) {
+				let bitString = str_pad(bitString, 64, "1", STR_PAD_LEFT);
+			}
+			else {
+				let bitString = str_pad(bitString, 64, "0", STR_PAD_LEFT);
+			}
+
+			let hi = substr(bitString, 0, 32);
+			let lo = substr(bitString, 32, 32);
+			let hiBin = pack( "H*", str_pad(base_convert( hi, 2, 16 ), 8, 0, STR_PAD_LEFT));
+			let loBin = pack( "H*", str_pad(base_convert( lo, 2, 16 ), 8, 0, STR_PAD_LEFT));
+			let data = hiBin . loBin;
+			*/
+			let data = "";
+		}
+
+		if (store) {
+			let this->requestMessage = this->requestMessage . data;
+		}
+
+		return data;
+	}
+
+	/**
 	 * Add "boolean" data to sockets message
 	 *
 	 * @param string  booleanValue value to add
-	 * @param boolean store        store value on message, true by default
+	 * @param boolean store		store value on message, true by default
 	 * @return string
 	 */
 	protected function addBoolean(string booleanValue, store = true) -> string
@@ -364,29 +453,6 @@ class OperationAbstract
 		return boolVal;
 	}
 
-	protected function getBasicResponse()
-	{
-		/*
-		var stream;
-		var reponse;
-		string header_format;
-		let header_format = 
-				"nprotocol/" .
-				"Cstatus/" .
-				"Itransaction";
-
-		//stream = stream_get_contents(this->socket, 7);
-		let stream = this->socket->stream(7);
-		let reponse = unpack (header_format, stream);
-
-		if (reponse["transaction"] > 2147483647) {
-			let reponse["transaction"] = -((reponse["transaction"] ^ 0xFFFFFFFF) + 1);
-		}
-
-		return [reponse["protocol"], reponse["status"], reponse["transaction"]];
-		*/
-	}
-
 
 	/**
 	 * Get exception class and exception message from socket and throws new exception
@@ -397,7 +463,7 @@ class OperationAbstract
 	{
 
 		// [(1)(exception-class:string)(exception-message:string)]*(0)(serialized-exception:bytes)
-		// (1)(com.orientechnologies.orient.core.exception.OStorageException)(Can't open the storage 'demo')(0)
+		// (1)(com.orientechnologies.orient.core.exception.OStorageException)(Can"t open the storage 'demo')(0)
 		// (1)(com.orientechnologies.orient.core.exception.OStorageException)(Can't open the storage 'demo')(1)(com.orientechnologies.orient.core.exception.OStorageException)(File not found)(0)
 		var exceptionStatus;
 		var exceptionClass;
