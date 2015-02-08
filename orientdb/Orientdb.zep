@@ -282,6 +282,26 @@ class Orientdb
 	}
 
 	/**
+	 * Select RecordLoad method
+	 *
+	 * @param short   cluster     ID of the cluster of the record
+	 * @param long    position    Limit on the query, by default limit from query
+	 * @param string  fetchplan   Fetchplan, no fetchplan by default
+	 * @param boolean mergefetch  Merge fetchedplan data into the record
+	 * @param boolean ignoreCache If the cache must be ignored: true = ignore the cache, false = not ignore
+	 * @return array
+	 */
+	public function recordLoad(int cluster, long position, string fetchplan = "*:0", boolean mergefetch = false, boolean ignoreCache = false) -> array
+	{
+		this->canPerformDatabaseOperation();
+
+		var resourceClass;
+		let resourceClass = new RecordLoad(this);
+
+		return resourceClass->run(cluster, position, fetchplan, mergefetch, ignoreCache);
+	}
+
+	/**
 	 * Database Size method
 	 *
 	 * @return int

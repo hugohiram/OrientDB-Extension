@@ -44,6 +44,7 @@ Haven't tried in a PHP 5.3.x installation.
 * DBList (REQUEST_DB_LIST)
 * Query (REQUEST_COMMAND - OSQLSynchQuery)
 * Command (REQUEST_COMMAND - OCommandSQL)
+* RecordLoad (REQUEST_RECORD_LOAD)
 * DBSize (REQUEST_DB_SIZE)
 * DBCountRecords (REQUEST_DB_COUNTRECORDS)
 * DBReload (REQUEST_DB_RELOAD)
@@ -63,7 +64,6 @@ Haven't tried in a PHP 5.3.x installation.
 * REQUEST_DATACLUSTER_COPY
 * REQUEST_DATACLUSTER_LH_CLUSTER_IS_USED
 * REQUEST_RECORD_METADATA
-* REQUEST_RECORD_LOAD
 * REQUEST_RECORD_CREATE
 * REQUEST_RECORD_UPDATE
 * REQUEST_RECORD_DELETE
@@ -348,6 +348,38 @@ $result = $orient->command('insert into simple set name = "my name", year = "201
 $result = $orient->command('drop class simple');
 
 //$result = $orient->command( "traverse extlist from #10:1");
+
+```
+---
+
+### RecordLoad ###
+##### (REQUEST_REQUEST_RECORD_LOAD) #####
+Load a record by RecordID, according to a fetch plan
+```php
+RecordLoad(int cluster, int position [, string fetchplan [, boolean mergefetch [, boolean ignoreCache]]]) : array
+```
+#### Parameters
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_cluster_** | ID of the cluster | yes
+**_position_** | Position of record | yes
+**_fetchplan_** | Fetchplan, no fetchplan by default | no
+**_mergefetch_** | Merge fetchedplan data into the record | no
+**_ignoreCache_** | If the cache must be ignored: true = ignore the cache, false = not ignore | no
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+$record = $orient->recordLoad(10, 0, "*:2", true);
+$data = $records->data;
+var_dump($data);
+
+
+$record = $orient->recordLoad(10, 1);
+$data = $records->data;
+$data->keyname;
+var_dump($data);
 
 ```
 ---
