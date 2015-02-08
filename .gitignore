@@ -1,0 +1,6 @@
+vendor/
+php/
+.temp/
+compile.log
+compile-errors.log
+composer.lock
