@@ -1,7 +1,7 @@
 # OrientDB-Extension
 ==================
 
-An [OrientDB](https://github.com/nuvolabase/orientdb) extension for PHP written in [Zephir](http://zephir-lang.com/) language. Go to the [wiki](OrientDB-Extension/wiki) to know more 
+An [OrientDB](https://github.com/nuvolabase/orientdb) extension for PHP written in [Zephir](http://zephir-lang.com/) language. Go to the [wiki](https://github.com/hugohiram/OrientDB-Extension/wiki) to know more 
 
 ## Description ##
 
