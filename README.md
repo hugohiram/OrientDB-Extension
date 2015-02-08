@@ -11,6 +11,10 @@ The purpose of this development is to have a fast and simple PHP extension, it i
 
 The record decoder was rewritten, it doesn't decode the response into multiple properties, it converts the OrientDB [propietary format](https://github.com/orientechnologies/orientdb/wiki/Record-CSV-Serialization) into a JSON.
 
+## Protocol version ##
+
+The latest version supported is v.26. It contains changes from v.27 and v.28, but it does not support token sessions yet.
+
 ## Requirements ##
 
 This extension requires:
@@ -45,6 +49,7 @@ Haven't tried in a PHP 5.3.x installation.
 * Query (REQUEST_COMMAND - OSQLSynchQuery)
 * Command (REQUEST_COMMAND - OCommandSQL)
 * RecordLoad (REQUEST_RECORD_LOAD)
+* RecordDelete (REQUEST_RECORD_DELETE)
 * DBSize (REQUEST_DB_SIZE)
 * DBCountRecords (REQUEST_DB_COUNTRECORDS)
 * DBReload (REQUEST_DB_RELOAD)
@@ -66,7 +71,6 @@ Haven't tried in a PHP 5.3.x installation.
 * REQUEST_RECORD_METADATA
 * REQUEST_RECORD_CREATE
 * REQUEST_RECORD_UPDATE
-* REQUEST_RECORD_DELETE
 * REQUEST_RECORD_COPY
 * REQUEST_POSITIONS_HIGHER
 * REQUEST_POSITIONS_LOWER
@@ -123,8 +127,8 @@ catch(OrientdbException $e) {
 ```
 ---
 
-### Protocol version ###
-To se the protocol version, use the `setProtocolVersion` method. The latest version supported is v.26
+### Protocol ###
+To se the protocol version, use the `setProtocolVersion` method.
 
 #### Example
 ```php
@@ -353,7 +357,7 @@ $result = $orient->command('drop class simple');
 ---
 
 ### RecordLoad ###
-##### (REQUEST_REQUEST_RECORD_LOAD) #####
+##### (REQUEST_RECORD_LOAD) #####
 Load a record by RecordID, according to a fetch plan
 ```php
 RecordLoad(int cluster, int position [, string fetchplan [, boolean mergefetch [, boolean ignoreCache]]]) : array
@@ -380,6 +384,31 @@ $record = $orient->recordLoad(10, 1);
 $data = $records->data;
 $data->keyname;
 var_dump($data);
+
+```
+---
+
+### RecordDelete ###
+##### (REQUEST_RECORD_DELETE) #####
+Delete a record by its RecordID. During the optimistic transaction the record will be
+deleted only if the versions match. Returns true if has been deleted otherwise false.
+```php
+RecordDelete(int cluster, int position [, int version = -1 [, boolean mode = false]]) : boolean
+```
+#### Parameters
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_cluster_** | ID of the cluster | yes
+**_position_** | Position of record | yes
+**_version_** | version of the record, -1 by default (any version) | no
+**_mode_** | false = synchronous or true = asynchronous, sync as default | no
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+$result = $orient->RecordDelete(16, 2);
+var_dump($result);
 
 ```
 ---

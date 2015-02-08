@@ -302,6 +302,25 @@ class Orientdb
 	}
 
 	/**
+	 * Select recordDelete method
+	 * 
+	 * @param int     cluster  ID of the cluster of the record
+	 * @param long    position Limit on the query, by default limit from query
+	 * @param int     version  version of the record, -1 by default (any version), set version to make sure that is thaa latest one.
+	 * @param boolean mode     false = synchronous or true = asynchronous, sync as default.
+	 * @return boolean
+	 */
+	public function recordDelete(int cluster, long position, int version = -1, boolean mode = false) -> boolean
+	{
+		this->canPerformDatabaseOperation();
+
+		var resourceClass;
+		let resourceClass = new recordDelete(this);
+
+		return resourceClass->run(cluster, position, version, mode);
+	}
+
+	/**
 	 * Database Size method
 	 *
 	 * @return int
