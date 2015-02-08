@@ -36,6 +36,16 @@ Haven't tried in a PHP 5.3.x installation.
     cp ext/modules/orientdb.so /PATH-TO-PHP/share/modules/orientdb.so
     service apache2 restart
 
+## Unit testing ##
+
+Install composer, go to the root of the project:
+
+    composer install
+
+To run the tests, go to the root of the project;
+
+    phpunit tests/
+
 ## Done ##
 
 * Shutdown (REQUEST_SHUTDOWN)
