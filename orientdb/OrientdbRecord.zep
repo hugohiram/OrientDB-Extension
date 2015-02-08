@@ -33,6 +33,10 @@ class OrientdbRecord
 	protected version { set, get };
 	// raw content of the record
 	protected content { set, get };
+	// raw extra of the record
+	protected extra { set, get };
+	// raw fetch of the record
+	protected fetched { set, get };
 	// 
 	//protected properties { set, get };
 	// decoded data
@@ -72,5 +76,39 @@ class OrientdbRecord
 		}
 
 		return null;
+	}
+
+	/**
+	 * Merge fetched records
+	 *
+	 * @return void
+	 */
+	public function mergeFetchedRecords() -> void
+	{
+		var item;
+
+		if (this->data instanceof "OrientdbRecordData") {
+			var tmp;
+			let tmp = this->data->keyname;
+		}
+
+		if (count(this->fetched) > 0) {
+			for item in this->fetched {
+				var regex, rid;
+
+				let rid = "#" . item->cluster . ":" . item->position;
+				let regex = "/(\"" . rid . "\")/";
+				////let regex = "/(" . rid . ")\\b/";
+				
+				item->mergeFetchedRecords();
+
+				var jsonStr;
+				let jsonStr = substr_replace(item->data->json, "\"@rid\":\"" . rid . "\"," , 1, 0);
+
+				this->data->replace(regex, jsonStr);
+			}
+
+			unset(this->fetched);
+		}
 	}
 }

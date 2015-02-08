@@ -23,6 +23,7 @@ class OrientdbRecordData
 {
 	private data;
 	private metadata;
+	private json;
 	private content;
 	private isDecoded;
 
@@ -37,6 +38,7 @@ class OrientdbRecordData
 		let this->content = content;
 		let this->data = new stdClass();
 		let this->metadata = new stdClass();
+		let this->json = "";
 	}
 
 	/**
@@ -78,8 +80,18 @@ class OrientdbRecordData
 		var decoder;
 		let decoder = new OrientdbRecordDataDecoder(this->content);
 		let this->data = decoder->getJson(true);
+		let this->json = json_encode(this->data);
 		let this->metadata = decoder->getMetadata();
 
 		let this->isDecoded = true;		
+	}
+
+	/**
+	 * Caller to decoder
+	 */
+	public function replace(string regex, string replacement) -> void
+	{
+		let this->json = preg_replace(regex, replacement, this->json);
+		let this->data = json_decode(this->json);
 	}
 }
