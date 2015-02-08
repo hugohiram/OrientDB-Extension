@@ -49,7 +49,7 @@ class RecordDelete extends OperationAbstract
 	 * @param int     cluster  ID of the cluster of the record
 	 * @param long    position Limit on the query, by default limit from query
 	 * @param int     version  version of the record
-	 * @param boolean mode     false = synchronous or true = asynchronous, sync as default.
+	 * @param boolean mode     false = synchronous (default), true = asynchronous
 	 * @return boolean
 	 */
 	public function run(int cluster, long position, int version, boolean mode) -> boolean
