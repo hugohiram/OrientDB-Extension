@@ -1,0 +1,16 @@
+{
+    "name": "hugohiram/OrientDB-Extension",
+    "description": "OrientDB extension for PHP written in Zephir language",
+    "authors": [
+        {
+            "name": "Hugo Hiram",
+            "email": "hugo@hugohiram.com"
+        }
+    ],
+    "require": {
+        "phpunit/phpunit": "4.5.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.5.*"
+    }
+}
