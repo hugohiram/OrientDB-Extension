@@ -72,6 +72,8 @@ class OperationAbstract
 	protected session;
 	protected response;
 
+	protected debug;
+
 	/**
 	 * Orientdb\OperationAbstract constructor
 	 *
@@ -80,6 +82,7 @@ class OperationAbstract
 	public function __construct(parent)
 	{
 		//echo __CLASS__;
+		let this->debug = false;
 		let this->parent = parent;
 		let this->socket = parent->socket;
 	}
@@ -462,7 +465,6 @@ class OperationAbstract
 	 */
 	protected function handleException(int code = 400) -> void
 	{
-
 		// [(1)(exception-class:string)(exception-message:string)]*(0)(serialized-exception:bytes)
 		// (1)(com.orientechnologies.orient.core.exception.OStorageException)(Can"t open the storage 'demo')(0)
 		// (1)(com.orientechnologies.orient.core.exception.OStorageException)(Can't open the storage 'demo')(1)(com.orientechnologies.orient.core.exception.OStorageException)(File not found)(0)
@@ -479,6 +481,10 @@ class OperationAbstract
 			if (exceptionStatus == (chr(OperationAbstract::EXCEPTION_FOUND))) {
 				let exceptionMessage .= "; ";
 			}
+		}
+
+		if (this->parent->debug == true) {
+			syslog(LOG_DEBUG, "Exception: " . exceptionMessage);
 		}
 
 		throw new OrientdbException(exceptionMessage, code);

@@ -27,7 +27,7 @@ This extension requires:
 
 Haven't tried in a PHP 5.3.x installation.
 
-## clone and build ##
+## Clone and build ##
 
     git clone https://github.com/hugohiram/OrientDB-Extension
     cd OrientDB-Extension
@@ -107,7 +107,7 @@ To run the tests, go to the root of the project;
 
 ### Create object ###
 ```php
-Orientdb ( string host [, int port = 2424 [, string serialization = "csv" ]] ) : Object
+Orientdb ( string host [, int port = 2424 [, string serialization = "csv" [, boolean debug = false ]]] ) : Object
 ```
 #### Parameters
 Parameter  | Description
@@ -115,6 +115,7 @@ Parameter  | Description
 **_host_** | IP or Host of the OrientDB Server
 **_port_** | Port used on the OrientDB Server
 **_serialization_** | Serialization used: csv-binary, only csv supported at the moment
+**_debug_** | debug option, false by default
 
 #### Example
 ```php
@@ -123,12 +124,12 @@ $orient = new Orientdb\Orientdb('localhost', 2424);
 ---
 
 ### Exceptions ###
-When something goes wrong or a criteria is not met, for ecxample when is not possible to connect to a server, the extension will throw an `OrientdbException` exception.
+When something goes wrong or a criteria is not met, for example when is not possible to connect to a server, the extension will throw an `OrientdbException` exception.
 
 #### Example
 ```php
 try{
-    $orient = new Orientdb\Orientdb('locaho..', 2424);
+    $orient = new Orientdb\Orientdb('localhost', 2424);
 }
 catch(OrientdbException $e) {
     var_dump($e->getMessage());
@@ -143,7 +144,7 @@ To se the protocol version, use the `setProtocolVersion` method.
 #### Example
 ```php
 try{
-    $orient = new Orientdb\Orientdb('locaho...', 2424);
+    $orient = new Orientdb\Orientdb('localhost', 2424);
     $orient->setProtocolVersion(24);
 }
 catch(OrientdbException $e) {

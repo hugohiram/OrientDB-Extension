@@ -44,18 +44,26 @@ class Orientdb
 	public errstr;
 
 	public socket;
+
+	public debug;
 	
 	/**
 	 * Orientdb\Orientdb constructor
 	 *
-	 * @param string host          Hostname or IP of the OrientDB Server
-	 * @param int    port          Port number of the OrientDB Server, 2424 by default
-	 * @param string serialization type of serialization implementation, "csv" by default
+	 * @param string  host          Hostname or IP of the OrientDB Server
+	 * @param int     port          Port number of the OrientDB Server, 2424 by default
+	 * @param string  serialization type of serialization implementation, "csv" by default
+	 * @param boolean debug         enabled debug, write to syslog, "false" by default
 	 */
-	public function __construct(string host, int port = 2424, string serialization = "csv")
+	public function __construct(string host, int port = 2424, string serialization = "csv", debug = false)
 	{
 		let this->error = false;
 		let this->session = -1;
+		let this->debug = debug;
+
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__);
+		}
 
 		//@TODO: autoloading
 		//spl_autoload_register([this, "autoload"]);
@@ -65,6 +73,7 @@ class Orientdb
 			let this->error = true;
 			let this->errstr = "Could not open socket";
 			let this->errno = 500;
+			syslog(LOG_ERR, this->errstr);
 			throw new OrientdbException(this->errstr, this->errno);
 		}
 
@@ -355,9 +364,9 @@ class Orientdb
 	 *
 	 * @param string dbName Name of the database to Freeze
 	 * @param string storageType Storage type of the database: plocal|local|memory, "plocal" by default
-	 * @return array
+	 * @return boolean
 	 */
-	public function DBFreeze(string dbName, string storageType = "plocal")
+	public function DBFreeze(string dbName, string storageType = "plocal")-> boolean
 	{
 		this->canPerformServerOperation();
 
@@ -372,9 +381,9 @@ class Orientdb
 	 *
 	 * @param string dbName Name of the database to Release
 	 * @param string storageType Storage type of the database: plocal|local|memory, "plocal" by default
-	 * @return array
+	 * @return boolean
 	 */
-	public function DBRelease(string dbName, string storageType = "plocal")
+	public function DBRelease(string dbName, string storageType = "plocal") -> boolean
 	{
 		this->canPerformServerOperation();
 		this->canPerformDatabaseOperation();
