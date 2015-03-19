@@ -41,6 +41,10 @@ class RecordLoad extends OperationAbstract
 		let this->socket = parent->socket;
 
 		let this->operation = OperationAbstract::REQUEST_RECORD_LOAD;
+
+		if (this->parent->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__);
+		}
 	}
 
 	/**
@@ -110,6 +114,14 @@ class RecordLoad extends OperationAbstract
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 			let payload = this->readByte(this->socket);
+			if (this->parent->debug == true && ord(payload) <= 0) {
+				syslog(LOG_DEBUG, __METHOD__ . " - No record found");
+				return new OrientdbRecord();
+			}
+
+			if (this->parent->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " - Success");
+			}
 			while (ord(payload) > 0) {
 				if (ord(payload) == 1) {
 					let record = new OrientdbRecord();
@@ -155,6 +167,9 @@ class RecordLoad extends OperationAbstract
 			return record;
 		}
 		else {
+			if (this->parent->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " - Status: error");
+			}
 			this->handleException();
 		}
 
