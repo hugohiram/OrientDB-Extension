@@ -544,14 +544,21 @@ class OrientdbRecordDataDecoder
 	{
 		var buffer = "", matches = [];
 		int offset;
-		if (preg_match("/^\\d+b/", content, matches) || // byte: 124b
-			preg_match("/^\\d+s/", content, matches) || // short: 124s
-			preg_match("/^\\d+l/", content, matches) || // long: 124l
-			preg_match("/^[-+]?(\\d*[.])?\\d+f/", content, matches) || // float: 120.3f
-			preg_match("/^[-+]?(\\d*[.])?\\d+d/", content, matches) || // double: 120.3d
-			preg_match("/^\\d+t/", content, matches) || // datetime: 1296279468000t
-			preg_match("/^\\d+a/", content, matches)) { // date: 1306281600000a
-			let offset = -1;
+		if (preg_match("/^\\d+(b)/", content, matches) || // byte: 124b
+			preg_match("/^\\d+(s)/", content, matches) || // short: 124s
+			preg_match("/^\\d+(l)/", content, matches) || // long: 124l
+			preg_match("/^[-+]?(\\d*[.])?\\d+(f)/", content, matches) || // float: 120.3f
+			preg_match("/^[-+]?(\\d*[.])?\\d+(d)/", content, matches) || // double: 120.3d
+			preg_match("/^\\d+(t)/", content, matches) || // datetime: 1296279468000t
+			preg_match("/^\\d+(a)/", content, matches)) { // date: 1306281600000a
+		    int length;
+			let length = strlen(matches[0]);
+			if (length == 14 && (matches[1] == "t" || matches[1] == "a")) {
+			    let offset = -4;
+			}
+			else {
+			    let offset = -1;
+			}
 		}
 		else {
 			if (preg_match("/^\\d+/", content, matches)) { // integer: 124
