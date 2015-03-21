@@ -471,21 +471,22 @@ class OperationAbstract
 		var exceptionStatus;
 		var exceptionClass;
 		var exceptionMessage = "";
+		var exceptions = [];
 
 		let exceptionStatus = this->readByte(this->socket);
 		while (exceptionStatus == (chr(self::EXCEPTION_FOUND))) {
 			let exceptionClass = this->readString(this->socket);
 			let exceptionMessage = this->readString(this->socket);
 
+			if (this->parent->debug == true) {
+            	syslog(LOG_DEBUG, exceptionClass . ": " . exceptionMessage);
+            }
+
+            let exceptions[] = exceptionClass . "::" . exceptionMessage;
 			let exceptionStatus = this->readByte(this->socket);
-			if (exceptionStatus == (chr(OperationAbstract::EXCEPTION_FOUND))) {
-				let exceptionMessage .= "; ";
-			}
 		}
 
-		if (this->parent->debug == true) {
-			syslog(LOG_DEBUG, "Exception: " . exceptionMessage);
-		}
+		let exceptionMessage = implode(";;", exceptions);
 
 		throw new OrientdbException(exceptionMessage, code);
 	}
