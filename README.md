@@ -455,7 +455,12 @@ RecordUpdate(int cluster, long position, var content [, int version = -1 [, bool
 Parameter  | Description   |  Mandatory
 ---------- | ------------- | -----------
 **_cluster_** | ID of the cluster | yes
-**_record_** | associative array with the properties of the record | yes
+**_position_** | Position of the record | yes
+**_record_** | associative array with the properties of the record to update | yes
+**_version_** | Version of the record, or policy: -1 = version increment, no version control, -2 = no version control nor increment | no
+**_update_** | Type of update: true = content has changed, false = relations have changed | no
+**_type_** | Type of data: b = raw, f = flat, d = document | no
+**_mode_** | Sync mode: false = synchronous (default), true = asynchronous | no
 
 #### Example
 ```php
