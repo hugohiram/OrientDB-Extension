@@ -673,3 +673,23 @@ $records = $orient->DataclusterCount($clusters);
 ```
 ---
 
+### DataclusterRange ###
+##### (REQUEST_DATACLUSTER_DATARANGE) #####
+Returns the range of record ids for a cluster.
+```php
+DataclusterRange( int cluster ) : long
+```
+#### Parameters
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_cluster_** | ID of the cluster | yes
+
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+$range = $orient->DataclusterRange(10);
+```
+---
+

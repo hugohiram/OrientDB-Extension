@@ -494,6 +494,22 @@ class Orientdb
 		return resourceClass->run(clusters, tombstone);
 	}
 
+	/**
+	 * Datacluster Range method
+	 *
+	 * @param int cluster ID of the cluster
+	 * @return long
+	 */
+	public function DataclusterRange(int cluster) -> long
+	{
+		this->canPerformDatabaseOperation();
+
+		var resourceClass;
+		let resourceClass = new DataclusterRange(this);
+
+		return resourceClass->run(cluster);
+	}
+
 
 	/////////////////////////////////////////
 	//       Orientdb custom methods       //
