@@ -400,6 +400,56 @@ var_dump($data);
 ```
 ---
 
+### RecordCreate ###
+##### (REQUEST_RECORD_CREATE) #####
+Create a new record
+```php
+RecordLoad(int cluster, array record) : array
+```
+#### Parameters
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_cluster_** | ID of the cluster | yes
+**_record_** | associative array with the properties of the record | yes
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+
+$content = [
+	'keyname'	=> 'test1',
+	'active'	=> true,
+	'dificulty'	=> 3,
+	'quantity'	=> 64,
+	'year'		=> 2015,
+	'price'		=> 6.99,
+	'date'		=> "2015-03-21",
+	'date2'		=> new DateTime('now'),
+	'external'	=> "#12:0",
+	'extlist'	=> ["#12:0","#12:1"],
+	'language'	=> [	'en' => 'Hello',
+						'es' => 'Hola'],
+	'name'		=> [	'@type'  => 'd',
+						'@class' => 'simple',
+						'data'   => 'saludar']/**/
+];
+$newRecord = $orient->RecordCreate(14, $content);
+
+
+$record = $orient->recordLoad(10, 0, "*:2", true);
+$data = $records->data;
+var_dump($data);
+
+// load the record to verify
+$record = $orient->recordLoad($newRecord->cluster, $newRecord->position);
+$data = $records->data;
+$data->metadata;
+var_dump($data);
+
+```
+---
+
 ### RecordDelete ###
 ##### (REQUEST_RECORD_DELETE) #####
 Delete a record by its RecordID. During the optimistic transaction the record will be
