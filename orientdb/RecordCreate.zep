@@ -64,9 +64,6 @@ class RecordCreate extends OperationAbstract
 	    elseif is_object(content) {
 	        let this->_content = get_object_vars(content);
 	    }
-	    else {
-	        throw new OrientdbException("content has to be an array or an object.", 400);
-	    }
 
 		let this->_cluster = cluster;
 		let this->_type	= type;
@@ -155,6 +152,9 @@ class RecordCreate extends OperationAbstract
 			return record;
 		}
 		else {
+			if (this->parent->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " - Status: error");
+			}
 			this->handleException();
 		}
 

@@ -296,13 +296,17 @@ class Orientdb
 	 * @param int     cluster ID of the cluster of the record
 	 * @param var     content Content of the new record
 	 * @param string  type    Type of data: b = raw, f = flat, d = document
-	 * @param boolean mode    false = synchronous (default), true = asynchronous
-	 * @param int     cluster NUmber of data segment
-	 * @return array
+	 * @param boolean mode    Sync mode: false = synchronous (default), true = asynchronous
+	 * @param int     cluster Number of data segment
+	 * @return int
 	 */
-	public function recordCreate(int cluster, var content, string type = "d", boolean mode = false, int segment = -1) -> array
+	public function recordCreate(int cluster, var content, string type = "d", boolean mode = false, int segment = -1) -> int
 	{
 		this->canPerformDatabaseOperation();
+
+	    if !is_array(content) && !is_object(content) {
+	        throw new OrientdbException("content has to be an array or an object.", 400);
+	    }
 
 		var resourceClass;
 		let resourceClass = new recordCreate(this);
