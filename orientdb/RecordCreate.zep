@@ -50,24 +50,30 @@ class RecordCreate extends OperationAbstract
 	 * Main method to run the operation
 	 * 
 	 * @param int	  cluster ID of the cluster of the record
-	 * @param array   content Content of the new record
+	 * @param var     content Content of the new record
 	 * @param string  type	  Type of data: b = raw, f = flat, d = document
 	 * @param boolean mode	  false = synchronous (default), true = asynchronous
 	 * @param int	  cluster Number of data segment
 	 * @return array
 	 */
-	public function run(int cluster, array content, string type, boolean mode, int segment) -> array
+	public function run(int cluster, var content, string type, boolean mode, int segment) -> array
 	{
+	    if is_array(content) {
+	        let this->_content = content;
+	    }
+	    elseif is_object(content) {
+	        let this->_content = get_object_vars(content);
+	    }
+	    else {
+	        throw new OrientdbException("content has to be an array or an object.", 400);
+	    }
+
 		let this->_cluster = cluster;
-		let this->_content = content;
 		let this->_type	= type;
 		let this->_mode	= mode;
 		let this->_segment = segment;
 
 		let this->_record = new OrientdbRecord();
-		//let this->_record->type = this->_type;
-		//let this->_record->cluster = this->_cluster;
-		//let this->_record->content = this->_content;
 
 		this->prepare();
 		this->execute();
@@ -124,8 +130,8 @@ class RecordCreate extends OperationAbstract
 			let record->cluster = this->readShort(this->socket);
 			let record->position = this->readLong(this->socket);
 			let record->version = this->readInt(this->socket);
-			let record->content = this->_content;
-			let record->data = new OrientdbRecordData(record->content);
+			let record->content = json_encode(this->_content);
+			//let record->data = new OrientdbRecordData(record->content);
 
 			let collections = this->readInt(this->socket);
 

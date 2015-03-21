@@ -294,13 +294,13 @@ class Orientdb
 	 * RecordCreate method
 	 *
 	 * @param int     cluster ID of the cluster of the record
-	 * @param array   content Content of the new record
+	 * @param var     content Content of the new record
 	 * @param string  type    Type of data: b = raw, f = flat, d = document
 	 * @param boolean mode    false = synchronous (default), true = asynchronous
 	 * @param int     cluster NUmber of data segment
 	 * @return array
 	 */
-	public function recordCreate(int cluster, array content, string type = "d", boolean mode = false, int segment = -1) -> array
+	public function recordCreate(int cluster, var content, string type = "d", boolean mode = false, int segment = -1) -> array
 	{
 		this->canPerformDatabaseOperation();
 

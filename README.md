@@ -436,11 +436,6 @@ $content = [
 ];
 $newRecord = $orient->RecordCreate(14, $content);
 
-
-$record = $orient->recordLoad(10, 0, "*:2", true);
-$data = $records->data;
-var_dump($data);
-
 // load the record to verify
 $record = $orient->recordLoad($newRecord->cluster, $newRecord->position);
 $data = $records->data;
