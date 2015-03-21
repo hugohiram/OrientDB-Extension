@@ -315,6 +315,32 @@ class Orientdb
 	}
 
 	/**
+	 * RecordUpdate method
+	 *
+	 * @param int	  cluster  ID of the cluster of the record
+	 * @param int	  position Position of the record
+	 * @param var     content  Content to update
+	 * @param int	  version  Version of the record, or policy: -1 = version increment, no version control, -2 = no version control nor increment
+	 * @param boolean update   Type of update: true = content has changed, false = relations have changed
+	 * @param string  type	   Type of data: b = raw, f = flat, d = document
+	 * @param boolean mode	   Sync mode: false = synchronous (default), true = asynchronous
+	 * @return array
+	 */
+	public function recordUpdate(int cluster, long position, var content, int version = -1, boolean update = true, string type = "d", boolean mode = false) -> array
+	{
+		this->canPerformDatabaseOperation();
+
+	    if !is_array(content) && !is_object(content) {
+	        throw new OrientdbException("content has to be an array or an object.", 400);
+	    }
+
+		var resourceClass;
+		let resourceClass = new recordUpdate(this);
+
+		return resourceClass->run(cluster, position, content, version, update, type, mode);
+	}
+
+	/**
 	 * Select RecordLoad method
 	 *
 	 * @param short   cluster     ID of the cluster of the record

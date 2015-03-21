@@ -404,13 +404,13 @@ var_dump($data);
 ##### (REQUEST_RECORD_CREATE) #####
 Create a new record
 ```php
-RecordLoad(int cluster, array record) : array
+RecordCreate(int cluster, array record) : array
 ```
 #### Parameters
 Parameter  | Description   |  Mandatory
 ---------- | ------------- | -----------
 **_cluster_** | ID of the cluster | yes
-**_record_** | associative array with the properties of the record | yes
+**_record_** | associative array (or object) with the properties of the record | yes
 
 #### Example
 ```php
@@ -439,6 +439,46 @@ $newRecord = $orient->RecordCreate(14, $content);
 // load the record to verify
 $record = $orient->recordLoad($newRecord->cluster, $newRecord->position);
 $data = $records->data;
+$data->metadata;
+var_dump($data);
+
+```
+---
+
+### RecordUpdate ###
+##### (REQUEST_RECORD_UPDATE) #####
+Update a record. Returns the new record's version.
+```php
+RecordUpdate(int cluster, long position, var content [, int version = -1 [, boolean update = true [, string type = "d" [, boolean mode = false]]]]) : integer
+```
+#### Parameters
+Parameter  | Description   |  Mandatory
+---------- | ------------- | -----------
+**_cluster_** | ID of the cluster | yes
+**_record_** | associative array with the properties of the record | yes
+
+#### Example
+```php
+$orient = new Orientdb\Orientdb('localhost', 2424);
+$orient->DBOpen('test', 'document', 'admin', 'admin');
+
+$record = $orient->recordLoad(14, 2);
+$data = $record->data;
+$data->metadata;
+
+$content = new stdClass();
+$content->keyname	= $data->keyname;
+$content->active	= false;
+$content->dificulty	= $data->dificulty;
+$content->quantity	= rand(10, 100);
+$content->year		= rand(2000, 2020);
+$content->price		= $data->price;
+
+$result = $orient->recordUpdate($record->cluster, $record->position, $content, $record->version);
+var_dump($result);
+
+$record = $orient->recordLoad(14, 2);
+$data = $record->data;
 $data->metadata;
 var_dump($data);
 
