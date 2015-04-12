@@ -90,11 +90,15 @@ class RequestCommand extends OperationAbstract
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 			let resultType = this->readByte(this->socket);
+			if (this->parent->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " - Result Type: " . resultType);
+			}
 			switch resultType {
 				case "l":
 					// List of records
 					let recordsCount = this->readInt(this->socket);
 					if (recordsCount == 0) {
+						this->readByte(this->socket);
 						return false;
 					}
 
@@ -115,6 +119,10 @@ class RequestCommand extends OperationAbstract
 					}
 
 					let result = records;
+
+                    if (this->parent->debug == true) {
+                        syslog(LOG_DEBUG, __METHOD__ . " - Result: " . json_encode(result));
+                    }
 					break;
 
 				case "r":
@@ -123,21 +131,38 @@ class RequestCommand extends OperationAbstract
 					this->readByte(this->socket);
 
 					let result = (this->_class == "Command")? record[0] : record;
+
+                    if (this->parent->debug == true) {
+                        syslog(LOG_DEBUG, __METHOD__ . " - Result: " . json_encode(result));
+                    }
 					break;
 
 				case "n":
 					// Null
 					this->readByte(this->socket);
 					let result =  true;
+
+                    if (this->parent->debug == true) {
+                        syslog(LOG_DEBUG, __METHOD__ . " - Result: true");
+                    }
 					break;
 
 				case "a":
 					// Something other
+					var tmp;
 					let result = this->readString(this->socket);
+                    if (this->parent->debug == true) {
+                        syslog(LOG_DEBUG, __METHOD__ . " - Result: " . result);
+                    }
 					if (result == "true" || result == "false") {
 						let result = (result == "true")? true : false;
 					}
-					this->readByte(this->socket);
+
+					let tmp = this->readByte(this->socket);
+
+                    if (this->parent->debug == true) {
+                        syslog(LOG_DEBUG, __METHOD__ . " - " . tmp);
+                    }
 					break;
 
 				default:
