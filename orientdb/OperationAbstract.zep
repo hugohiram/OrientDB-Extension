@@ -479,11 +479,16 @@ class OperationAbstract
 			let exceptionMessage = this->readString(this->socket);
 
 			if (this->parent->debug == true) {
-            	syslog(LOG_DEBUG, exceptionClass . ": " . exceptionMessage);
-            }
+				syslog(LOG_DEBUG, exceptionClass . ": " . exceptionMessage);
+			}
 
-            let exceptions[] = exceptionClass . "::" . exceptionMessage;
+			let exceptions[] = exceptionClass . "::" . exceptionMessage;
 			let exceptionStatus = this->readByte(this->socket);
+		}
+
+		if (this->parent->protocolVersion > 18) {
+			// serialized exception, not useful
+			this->readBytes(this->socket);
 		}
 
 		let exceptionMessage = implode(";;", exceptions);
@@ -495,7 +500,7 @@ class OperationAbstract
 	 * Serialize the record before sending it to the server
 	 *
 	 * @param array	  cluster arrayValue array with the record data
-	 * @param boolean cluster debug      Debug the process, false by default
+	 * @param boolean cluster debug	  	 Debug the process, false by default
 	 * @return string
 	 */
 	public static function serializeContent(array arrayValue, boolean debug = false)
@@ -511,8 +516,8 @@ class OperationAbstract
 		let sDocument = implode( ",", items );
 
 		if (debug == true) {
-		    syslog(LOG_DEBUG, __CLASS__ . " - Document: " . sDocument);
-        }
+			syslog(LOG_DEBUG, __CLASS__ . " - Document: " . sDocument);
+		}
 
 		return sDocument;
 	}
@@ -525,7 +530,7 @@ class OperationAbstract
 	 */
 	protected static function serialize(var value) -> string
 	{
-	    string regexDateTime;
+		string regexDateTime;
 
 		if ( value === null ) {
 			return "null";
@@ -535,17 +540,17 @@ class OperationAbstract
 		let regexDateTime = "/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\\s?((([0-1][0-9])|([2][0-3])):([0-5][0-9]):([0-5][0-9]))?$/";
 		//let regexDate = "/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/";
 
-        if (is_object(value) && ( value instanceof \DateTime )) {
-        	return (string)value->getTimestamp() . "000t";
-        }
+		if (is_object(value) && ( value instanceof \DateTime )) {
+			return (string)value->getTimestamp() . "000t";
+		}
 		elseif ( is_string( value ) ) {
-            if (preg_match(regexDateTime, value)) {
-                var matches;
-                string timeType;
-                let matches = [];
-                preg_match(regexDateTime, value, matches);
-                let timeType = (count(matches) > 3)? "t" : "a";
-                return (string)strtotime(value) . "000" . timeType;
+			if (preg_match(regexDateTime, value)) {
+				var matches;
+				string timeType;
+				let matches = [];
+				preg_match(regexDateTime, value, matches);
+				let timeType = (count(matches) > 3)? "t" : "a";
+				return (string)strtotime(value) . "000" . timeType;
 			}
 			elseif (preg_match("/^\\#\\d+\\:\\d+$/", value)) {
 				return value;
@@ -584,36 +589,36 @@ class OperationAbstract
 		boolean isEmbedded;
 		var embeddedClass;
 
-        let isEmbedded = false;
-        let embeddedClass = "";
+		let isEmbedded = false;
+		let embeddedClass = "";
 		let items = [];
 		let valueString = "";
 		if ((bool)count(array_filter(array_keys(arrayValue), "is_string"))) {
-		    for key, value in arrayValue {
-                if (key == "@class") {
-                    let isEmbedded = true;
-                    let embeddedClass = value;
-                    continue;
-                }
+			for key, value in arrayValue {
+				if (key == "@class") {
+					let isEmbedded = true;
+					let embeddedClass = value;
+					continue;
+				}
 
-            	let items[] = key . ":" . self::serialize( value );
-            }
+				let items[] = key . ":" . self::serialize( value );
+			}
 
-            if (isEmbedded == true) {
-                let valueString = "(" . embeddedClass . "@" . implode(",", items) . ")";
-            }
-            else {
-                let valueString = "{" . implode(",", items) . "}";
-            }
+			if (isEmbedded == true) {
+				let valueString = "(" . embeddedClass . "@" . implode(",", items) . ")";
+			}
+			else {
+				let valueString = "{" . implode(",", items) . "}";
+			}
 		}
 		else {
-		    for value in arrayValue {
-		        let items[] = self::serialize( value );
-		    }
+			for value in arrayValue {
+				let items[] = self::serialize( value );
+			}
 
-		    let valueString = "[" . implode(",", items) . "]";
+			let valueString = "[" . implode(",", items) . "]";
 		}
 
-        return valueString;
+		return valueString;
 	}
 }
