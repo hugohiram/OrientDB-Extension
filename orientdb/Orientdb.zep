@@ -28,7 +28,7 @@ class Orientdb
 	const SERIALIZATION_BINARY	= "ORecordSerializerBinary";
 
 	public driverName = "PHP-Extension";
-	public driverVersion = "0.5";
+	public driverVersion = "0.6";
 	public protocolVersion = 26;
 	public clientId = null;
 	public serialization;
