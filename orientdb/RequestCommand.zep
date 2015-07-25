@@ -97,6 +97,9 @@ class RequestCommand extends OperationAbstract
 				case "l":
 					// List of records
 					let recordsCount = this->readInt(this->socket);
+					if (this->parent->debug == true) {
+						syslog(LOG_DEBUG, __METHOD__ . " - records: " . recordsCount);
+					}
 					if (recordsCount == 0) {
 						this->readByte(this->socket);
 						return false;
@@ -105,13 +108,28 @@ class RequestCommand extends OperationAbstract
 					let records = [];
 					var pos;
 					for pos in range(1, recordsCount) {
-						let records[] = this->readRecord();
+						if (this->parent->debug == true) {
+							syslog(LOG_DEBUG, __METHOD__ . " - record #" . pos);
+						}
+						let record = this->readRecord();
+						let records[] = record;
+						if (this->parent->debug == true) {
+							syslog(LOG_DEBUG, __METHOD__ . " - record data: " . json_encode(record));
+						}
+						//let records[] = this->readRecord();
 					}
 
 					let status = this->readByte(this->socket);
 
+					if (this->parent->debug == true) {
+						syslog(LOG_DEBUG, __METHOD__ . " - status 2: " . ord(status));
+					}
+
 					while (ord(status) != 0) {
 						let record = this->readRecord();
+						if (this->parent->debug == true) {
+							syslog(LOG_DEBUG, __METHOD__ . " - internal: " . json_encode(record));
+						}
 						if (ord(status) == 1) {
 							let records[] = record;
 						}
@@ -121,7 +139,7 @@ class RequestCommand extends OperationAbstract
 					let result = records;
 
                     if (this->parent->debug == true) {
-                        syslog(LOG_DEBUG, __METHOD__ . " - Result: " . json_encode(result));
+                        //syslog(LOG_DEBUG, __METHOD__ . " - Result: " . json_encode(result));
                     }
 					break;
 
@@ -186,7 +204,9 @@ class RequestCommand extends OperationAbstract
 		var marker, clusterID, recordPos, record;
 
 		let marker = this->readShort(this->socket);
-
+		if (this->parent->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ . " - marker: " . marker);
+		}
 		if (marker == -2) {
 			// no record
 			return false;
@@ -203,7 +223,10 @@ class RequestCommand extends OperationAbstract
 		let record->position = this->readLong(this->socket);
 		let record->version = this->readInt(this->socket);
 		let record->content = this->readBytes(this->socket);
-		let record->data = new OrientdbRecordData(record->content);
+		let record->data = new OrientdbRecordData(record->content, this->parent->debug);
+		if (this->parent->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ . " - data: " . json_encode(record));
+		}
 
 		return record;
 	}
