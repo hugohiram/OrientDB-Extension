@@ -26,19 +26,21 @@ class OrientdbRecordData
 	private json;
 	private content;
 	private isDecoded;
+	private debug;
 
 	/**
 	 * Orientdb\OrientdbRecordData constructor
 	 *
 	 * @param string content Content to decode
 	 */
-	public function __construct(content)
+	public function __construct(content, boolean debug = false)
 	{
 		let this->isDecoded = false;
 		let this->content = content;
 		let this->data = new stdClass();
 		let this->metadata = new stdClass();
 		let this->json = "";
+		let this->debug = debug;
 	}
 
 	/**
@@ -78,9 +80,12 @@ class OrientdbRecordData
 	private function _decode() -> void
 	{
 		var decoder;
-		let decoder = new OrientdbRecordDataDecoder(this->content);
+		let decoder = new OrientdbRecordDataDecoder(this->content, this->debug);
 		let this->data = decoder->getJson(true);
 		let this->json = json_encode(this->data);
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ . " - json: " . this->json);
+		}
 		let this->metadata = decoder->getMetadata();
 
 		let this->isDecoded = true;		
@@ -93,5 +98,15 @@ class OrientdbRecordData
 	{
 		let this->json = preg_replace(regex, replacement, this->json);
 		let this->data = json_decode(this->json);
+	}
+
+	public function getJson() -> string
+	{
+		return this->json;
+	}
+
+	public function getMetadata() -> string
+	{
+		return this->metadata;
 	}
 }

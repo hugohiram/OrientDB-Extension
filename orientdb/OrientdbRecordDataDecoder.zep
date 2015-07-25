@@ -29,6 +29,7 @@ class OrientdbRecordDataDecoder
 	protected element;
 	protected className;
 	protected property;
+	protected debug;
 
 	const PROPERTY 	= 1;
 	const VALUE 	= 2;
@@ -38,7 +39,7 @@ class OrientdbRecordDataDecoder
 	 *
 	 * @param string content Content to decode
 	 */
-	public function __construct(content)
+	public function __construct(content, boolean debug = false)
 	{
 		let this->content = content;
 		let this->position = 0;
@@ -47,6 +48,7 @@ class OrientdbRecordDataDecoder
 		let this->element = [];
 		let this->property = "";
 		let this->metadata = new stdClass();
+		let this->debug = debug;
 
 		this->decode(this->content);
 	}
@@ -91,12 +93,21 @@ class OrientdbRecordDataDecoder
 
 		// get the @class
 		let sTransformation = this->getClassname(sTransformation);
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ . " - data: " . sTransformation);
+		}
 
 		// list to array
 		let sTransformation = this->convertSetToList(sTransformation);
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ . " - data: " . sTransformation);
+		}
 
 		// RID link to string, RID linksets to string
 		let sTransformation = this->convertRidToString(sTransformation);
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ . " - data: " . sTransformation);
+		}
 
 		let contentLength = strlen(sTransformation);
 		array_push(this->element, self::PROPERTY);
@@ -109,6 +120,9 @@ class OrientdbRecordDataDecoder
 				let this->property = this->decodePropertyName(sTransformation);
 				this->buildJson(this->property, true);
 				this->buildJson(substr(sTransformation, this->index, 1));
+				if (this->debug == true) {
+					syslog(LOG_DEBUG, __METHOD__ . " - Property Name: " . this->property);
+				}
 
 				array_push(this->element, self::VALUE);
 			}
@@ -157,6 +171,10 @@ class OrientdbRecordDataDecoder
 								break;
 					}
 
+					if (this->debug == true) {
+						syslog(LOG_DEBUG, __METHOD__ . " - Property Value: " . buffer);
+					}
+
 					this->buildJson(buffer);
 					array_pop(this->element);
 
@@ -175,6 +193,10 @@ class OrientdbRecordDataDecoder
 		array_pop(this->element);
 
 		this->closeJson();
+
+		if (this->debug == true) {
+            syslog(LOG_DEBUG, __METHOD__ . " - JSON: " . this->jsonContent);
+        }
 	}
 
 	/**
@@ -191,6 +213,9 @@ class OrientdbRecordDataDecoder
 
 		//let this->jsonContent .= buffer;
 		let this->jsonContent = this->jsonContent . buffer;
+		if (this->debug == true) {
+            //syslog(LOG_DEBUG, __METHOD__ . " - Building: " . this->jsonContent);
+        }
 	}
 
 	/**
@@ -221,6 +246,9 @@ class OrientdbRecordDataDecoder
 			this->buildJson(":");
 			this->buildJson(key, true);
 			this->buildJson(",");
+			if (this->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " - className: " . this->className);
+			}
 		}
 
 		return content;
@@ -311,6 +339,9 @@ class OrientdbRecordDataDecoder
 			let complex = true;
 			let startgroup = 1;
 			let groupActive = false;
+			if (this->debug == true) {
+            	syslog(LOG_DEBUG, __METHOD__ . " - Embeddedset found");
+            }
 		}
 
 		while (index <= contentLength) {
@@ -320,9 +351,15 @@ class OrientdbRecordDataDecoder
 			
 			if (cChar == "[") {
 				let level++;
+				if (this->debug == true) {
+                    syslog(LOG_DEBUG, __METHOD__ . " - Starting new list at level " .  level);
+                }
 			}
 			else {
 				if (cChar == "]") {
+                    if (this->debug == true) {
+                        syslog(LOG_DEBUG, __METHOD__ . " - Closing list at level " .  level);
+                    }
 					let level--;
 				}
 			}
@@ -332,18 +369,30 @@ class OrientdbRecordDataDecoder
 
 					let groupLevel++;
 					let groupActive = true;
+                    if (this->debug == true) {
+                        syslog(LOG_DEBUG, __METHOD__ . " - Starting embedded " .  groupLevel);
+                    }
 				}
 				else {
 					if (cChar == ")") {
+                        if (this->debug == true) {
+                            syslog(LOG_DEBUG, __METHOD__ . " - Closing embedded " .  groupLevel);
+                        }
 						let groupLevel--;
 					}
 				}
 
 				if (groupLevel == 0 && groupActive) {
 					let group = substr(content, startgroup, index - startgroup);
+					if (this->debug == true) {
+					    syslog(LOG_DEBUG, __METHOD__ . " - group " .  group);
+					}
 
-					let decoder = new OrientdbRecordDataDecoder(substr(group, 1, -1));
+					let decoder = new OrientdbRecordDataDecoder(substr(group, 1, -1), this->debug);
 					let embeddedResult = decoder->getJson();
+					if (this->debug == true) {
+                        syslog(LOG_DEBUG, __METHOD__ . " - Resulting embedded string: " .  embeddedResult);
+                    }
 					let startgroup = index + 1;
 					let groupActive = false;
 					
@@ -587,6 +636,7 @@ class OrientdbRecordDataDecoder
 	 */
 	private function decodeNumeric(content)
 	{
+		syslog(LOG_DEBUG, __METHOD__ . ": " . content);
 		string dataType = "", cast = "";
 		var buffer = "", matches = [];
 		int offset = -1;
@@ -674,7 +724,7 @@ class OrientdbRecordDataDecoder
 
 	protected function setMetadata(datatype)
 	{
-		/*
+		syslog(LOG_DEBUG, __METHOD__ . " - metadata: " . datatype);
 		var cChar, propertyName;
 		let propertyName = this->property;
 		let cChar = substr(propertyName, 0, 1);
@@ -685,8 +735,7 @@ class OrientdbRecordDataDecoder
 		if !empty propertyName {
 			let this->metadata[propertyName] = datatype;
 		}
-		var_dump(this->metadata);
-		*/
+		//var_dump(this->metadata);
 	}
 
 }

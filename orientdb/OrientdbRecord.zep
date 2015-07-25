@@ -42,11 +42,14 @@ class OrientdbRecord
 	// decoded data
 	protected data { set, get };
 
+	protected debug;
+
 	/**
 	 * Orientdb\OrientdbRecord constructor
 	 */
-	public function __construct()
+	public function __construct(boolean debug = false)
 	{
+		let this->debug = debug;
 		//echo __CLASS__;
 	}
 
@@ -85,6 +88,9 @@ class OrientdbRecord
 	 */
 	public function mergeFetchedRecords() -> void
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ . " - Merging fetched records");
+		}
 		var item;
 
 		if (this->data instanceof "OrientdbRecordData") {
