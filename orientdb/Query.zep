@@ -13,6 +13,7 @@ namespace Orientdb;
 /**
  * Query() command for OrientDB
  * https://github.com/orientechnologies/orientdb/wiki/Network-Binary-Protocol#request_command
+ * http://orientdb.com/docs/last/Network-Binary-Protocol.html#request_command
  *
  * @author Hugo Hiram <hugo@hugohiram.com>
  * @package Operation
@@ -58,15 +59,17 @@ class Query extends RequestCommand
 	 */
 	protected function setCommandPayload() -> void
 	{
+		//(mode:byte)(command-payload-length:int)(class-name:string)(command-payload)
 		var commandPayload;
 		this->addByte(self::MODE);
 
+		//(text:string)(non-text-limit:int)[(fetch-plan:string)](serialized-params:bytes[])
 		let commandPayload = "";
 		let commandPayload .= this->addBytes(self::CLASSNAME, false);
 		let commandPayload .= this->addBytes(trim(this->_query), false);
-		let commandPayload .= pack("N", this->_limit);
+		let commandPayload .= this->addInt(this->_limit, false);//pack("N", this->_limit);
 		let commandPayload .= this->addBytes(this->_fetchplan, false);
-		let commandPayload .= pack("N", 0);
+		let commandPayload .= this->addInt(0, false);//pack("N", 0);
 
 		this->addString(commandPayload);
 	}
