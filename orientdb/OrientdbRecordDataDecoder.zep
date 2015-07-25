@@ -65,7 +65,7 @@ class OrientdbRecordDataDecoder
 		if (asObject) {
 			let response = json_decode(this->jsonContent);
 
-			return response[0];
+			return response;
 		}
 
 		return this->jsonContent;
@@ -223,7 +223,7 @@ class OrientdbRecordDataDecoder
 	 */
 	private function closeJson() -> void
 	{
-		let this->jsonContent = "[{" . this->jsonContent . "}]";
+		let this->jsonContent = "{" . this->jsonContent . "}";
 	}
 
 	/**
