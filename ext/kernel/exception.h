@@ -21,7 +21,8 @@
 #ifndef ZEPHIR_KERNEL_EXCEPTIONS_H
 #define ZEPHIR_KERNEL_EXCEPTIONS_H
 
-#include "Zend/zend.h"
+#include <Zend/zend.h>
+#include "kernel/main.h"
 
 /** Exceptions */
 #define ZEPHIR_THROW_EXCEPTION_STR(class_entry, message) \
@@ -62,6 +63,5 @@ void zephir_throw_exception_string(zend_class_entry *ce, const char *message, ze
 void zephir_throw_exception_zval(zend_class_entry *ce, zval *message TSRMLS_DC);
 void zephir_throw_exception_zval_debug(zend_class_entry *ce, zval *message, const char *file, zend_uint line TSRMLS_DC);
 void zephir_throw_exception_format(zend_class_entry *ce TSRMLS_DC, const char *format, ...);
-void zephir_throw_exception_internal(zval *exception TSRMLS_DC);
 
 #endif /* ZEPHIR_KERNEL_EXCEPTIONS_H */
