@@ -314,7 +314,7 @@ class OrientdbRecordDataDecoder
 	private function convertRidToString(content) -> string
 	{
 		var pattern, replacement;
-		let pattern = "/(?!\")(\\#\\d+\\:\\d+)(?!\")/";
+		let pattern = "/(?!\")(\\#\\d+\\:\\d+)(?!\")(?!\\d)/";
 		let replacement = "\"$1\"";
 		let content = preg_replace(pattern, replacement, content);
 
