@@ -11,6 +11,7 @@
 namespace Orientdb;
 
 use stdClass;
+use Exception;
 
 /**
  * OrientdbRecordDataDecoder for OrientDB
@@ -62,13 +63,25 @@ class OrientdbRecordDataDecoder
 	public function getJson(asObject = false)
 	{
 		var response = [];
-		if (asObject) {
-			let response = json_decode(this->jsonContent);
+		var e;
+		try {
+			if (this->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . ": " . this->jsonContent);
+			}
+			if (asObject) {
+				let response = json_decode(trim(this->jsonContent));
+
+				return response;
+			}
+
+			return this->jsonContent;
+		} catch \Exception, e {
+			if (this->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " EXCEPTION: " . e->getMessage());
+			}
 
 			return response;
 		}
-
-		return this->jsonContent;
 	}
 
 	/**
@@ -127,6 +140,9 @@ class OrientdbRecordDataDecoder
 				array_push(this->element, self::VALUE);
 			}
 			else {
+				if (this->debug == true) {
+					syslog(LOG_DEBUG, __METHOD__ . " - character found: " . cChar);
+				}
 				if (end(this->element) == self::VALUE) {
 					let content = substr(sTransformation, this->position);
 
@@ -195,8 +211,8 @@ class OrientdbRecordDataDecoder
 		this->closeJson();
 
 		if (this->debug == true) {
-            syslog(LOG_DEBUG, __METHOD__ . " - JSON: " . this->jsonContent);
-        }
+			syslog(LOG_DEBUG, __METHOD__ . " - JSON: " . this->jsonContent);
+		}
 	}
 
 	/**
@@ -214,8 +230,8 @@ class OrientdbRecordDataDecoder
 		//let this->jsonContent .= buffer;
 		let this->jsonContent = this->jsonContent . buffer;
 		if (this->debug == true) {
-            //syslog(LOG_DEBUG, __METHOD__ . " - Building: " . this->jsonContent);
-        }
+			//syslog(LOG_DEBUG, __METHOD__ . " - Building: " . this->jsonContent);
+		}
 	}
 
 	/**
@@ -329,6 +345,9 @@ class OrientdbRecordDataDecoder
 	 */
 	private function decodeList(content) -> string
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__);
+		}
 		// list: list, linklist, linkset
 		// [1,2,3] | [#10:0,#10:2] and [(name:"Luca")]
 		int index = 0, level = 0, groupLevel = 0, contentLength = 0, startgroup = 0;
@@ -340,8 +359,8 @@ class OrientdbRecordDataDecoder
 			let startgroup = 1;
 			let groupActive = false;
 			if (this->debug == true) {
-            	syslog(LOG_DEBUG, __METHOD__ . " - Embeddedset found");
-            }
+				syslog(LOG_DEBUG, __METHOD__ . " - Embeddedset found");
+			}
 		}
 
 		while (index <= contentLength) {
@@ -352,14 +371,14 @@ class OrientdbRecordDataDecoder
 			if (cChar == "[") {
 				let level++;
 				if (this->debug == true) {
-                    syslog(LOG_DEBUG, __METHOD__ . " - Starting new list at level " .  level);
-                }
+					syslog(LOG_DEBUG, __METHOD__ . " - Starting new list at level " .  level);
+				}
 			}
 			else {
 				if (cChar == "]") {
-                    if (this->debug == true) {
-                        syslog(LOG_DEBUG, __METHOD__ . " - Closing list at level " .  level);
-                    }
+					if (this->debug == true) {
+						syslog(LOG_DEBUG, __METHOD__ . " - Closing list at level " .  level);
+					}
 					let level--;
 				}
 			}
@@ -369,15 +388,15 @@ class OrientdbRecordDataDecoder
 
 					let groupLevel++;
 					let groupActive = true;
-                    if (this->debug == true) {
-                        syslog(LOG_DEBUG, __METHOD__ . " - Starting embedded " .  groupLevel);
-                    }
+					if (this->debug == true) {
+						syslog(LOG_DEBUG, __METHOD__ . " - Starting embedded " .  groupLevel);
+					}
 				}
 				else {
 					if (cChar == ")") {
-                        if (this->debug == true) {
-                            syslog(LOG_DEBUG, __METHOD__ . " - Closing embedded " .  groupLevel);
-                        }
+						if (this->debug == true) {
+							syslog(LOG_DEBUG, __METHOD__ . " - Closing embedded " .  groupLevel);
+						}
 						let groupLevel--;
 					}
 				}
@@ -385,14 +404,14 @@ class OrientdbRecordDataDecoder
 				if (groupLevel == 0 && groupActive) {
 					let group = substr(content, startgroup, index - startgroup);
 					if (this->debug == true) {
-					    syslog(LOG_DEBUG, __METHOD__ . " - group " .  group);
+						syslog(LOG_DEBUG, __METHOD__ . " - group " .  group);
 					}
 
 					let decoder = new OrientdbRecordDataDecoder(substr(group, 1, -1), this->debug);
 					let embeddedResult = decoder->getJson();
 					if (this->debug == true) {
-                        syslog(LOG_DEBUG, __METHOD__ . " - Resulting embedded string: " .  embeddedResult);
-                    }
+						syslog(LOG_DEBUG, __METHOD__ . " - Resulting embedded string: " .  embeddedResult);
+					}
 					let startgroup = index + 1;
 					let groupActive = false;
 					
@@ -429,6 +448,9 @@ class OrientdbRecordDataDecoder
 	 */
 	private function decodeLink(content) -> string
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__);
+		}
 		// link
 		// #10:0 | [#10:0,#10:2]
 		string pattern;
@@ -455,6 +477,9 @@ class OrientdbRecordDataDecoder
 	 */
 	private function decodeMap(content) -> string
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__);
+		}
 		// maps
 		// {"database_name":"fred","database_alias":null})
 		int index = 0, level = 0, contentLength = 0;
@@ -498,6 +523,9 @@ class OrientdbRecordDataDecoder
 	 */
 	private function decodeEmbedded(content) -> string
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__);
+		}
 		// embedded, embeddedsets and embeddedmaps
 		// (name:"rules"), (name@@type:"document",name:"Bob")
 		int index = 0, level = 0, contentLength = 0;
@@ -544,6 +572,9 @@ class OrientdbRecordDataDecoder
 	 */
 	private function decodeString(content) -> string
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__);
+		}
 		string pattern;
 		var buffer, matches = [];
 		let pattern = "/\"(?:\\\\.|[^\"\\\\])*\"/";
@@ -567,6 +598,9 @@ class OrientdbRecordDataDecoder
 	 */
 	private function decodeBoolean(content) -> string
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__);
+		}
 		// boolean
 		string pattern;
 		var buffer, matches = [];
@@ -591,6 +625,9 @@ class OrientdbRecordDataDecoder
 	 */
 	private function decodeNumericSimple(content) -> string
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__);
+		}
 		var buffer = "", matches = [];
 		int offset;
 		if (preg_match("/^\\d+(b)/", content, matches) || // byte: 124b
@@ -600,13 +637,13 @@ class OrientdbRecordDataDecoder
 			preg_match("/^[-+]?(\\d*[.])?\\d+(d)/", content, matches) || // double: 120.3d
 			preg_match("/^\\d+(t)/", content, matches) || // datetime: 1296279468000t
 			preg_match("/^\\d+(a)/", content, matches)) { // date: 1306281600000a
-		    int length;
+			int length;
 			let length = strlen(matches[0]);
 			if (length == 14 && (matches[1] == "t" || matches[1] == "a")) {
-			    let offset = -4;
+				let offset = -4;
 			}
 			else {
-			    let offset = -1;
+				let offset = -1;
 			}
 		}
 		else {
@@ -636,7 +673,10 @@ class OrientdbRecordDataDecoder
 	 */
 	private function decodeNumeric(content)
 	{
-		syslog(LOG_DEBUG, __METHOD__ . ": " . content);
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__);
+		}
+		//syslog(LOG_DEBUG, __METHOD__ . ": " . content);
 		string dataType = "", cast = "";
 		var buffer = "", matches = [];
 		int offset = -1;
@@ -724,7 +764,7 @@ class OrientdbRecordDataDecoder
 
 	protected function setMetadata(datatype)
 	{
-		syslog(LOG_DEBUG, __METHOD__ . " - metadata: " . datatype);
+		//syslog(LOG_DEBUG, __METHOD__ . " - metadata: " . datatype);
 		var cChar, propertyName;
 		let propertyName = this->property;
 		let cChar = substr(propertyName, 0, 1);
@@ -735,7 +775,6 @@ class OrientdbRecordDataDecoder
 		if !empty propertyName {
 			let this->metadata[propertyName] = datatype;
 		}
-		//var_dump(this->metadata);
 	}
 
 }
