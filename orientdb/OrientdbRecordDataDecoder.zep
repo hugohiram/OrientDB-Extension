@@ -239,6 +239,9 @@ class OrientdbRecordDataDecoder
 	 */
 	private function closeJson() -> void
 	{
+		let this->jsonContent = str_replace("\n", "\\n", this->jsonContent);
+		let this->jsonContent = str_replace("\r", "\\r", this->jsonContent);
+
 		let this->jsonContent = "{" . this->jsonContent . "}";
 	}
 
