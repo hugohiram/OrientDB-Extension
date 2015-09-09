@@ -5,7 +5,7 @@ An [OrientDB](https://github.com/nuvolabase/orientdb) binary extension for PHP w
 
 ## Description ##
 
-The current version is 0.8.3, the status is considered as *Beta*, the development covers most of the features that are documented by the OrientDB binary documentation, with the exception of the Transactions. This is a port from Anton Terekhov's [OrientDB-PHP](https://github.com/AntonTerekhov/OrientDB-PHP) driver.
+The current version is 0.9, the status is considered as *Beta*, the development covers most of the features that are documented by the OrientDB binary documentation, with the exception of the Transactions. This is a port from Anton Terekhov's [OrientDB-PHP](https://github.com/AntonTerekhov/OrientDB-PHP) driver.
 
 The purpose of this development is to have a fast and simple PHP extension, it is intended only for document databases, initially graph databases will not be supported.
 

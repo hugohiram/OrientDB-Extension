@@ -34,16 +34,19 @@ class Query extends RequestCommand
 	/**
 	 * Main method to run the operation
 	 * 
-	 * @param string query     Query to execute
-	 * @param int    limit     Limit on the query, by default limit from query
-	 * @param string fetchplan Fetchplan, no fetchplan by default
+	 * @param string query        Query to execute
+	 * @param int    limit        Limit on the query, by default limit from query
+	 * @param string fetchplan    Fetchplan, no fetchplan by default
+	 * @param boolean autoDecode  If set to false, records won't decoded automatically, set it to true if records are
+	 *                            not going to be used, this will save some time on execution time in that case only
 	 * @return string
 	 */
-	public function run(string query, int limit = -1, string fetchplan = "*:0")
+	public function run(string query, int limit = -1, string fetchplan = "*:0", boolean autoDecode = true)
 	{
 		let this->_query = query;
 		let this->_limit = limit;
 		let this->_fetchplan = fetchplan;
+		let this->_autoDecode = autoDecode;
 
 		this->prepare();
 		this->execute();

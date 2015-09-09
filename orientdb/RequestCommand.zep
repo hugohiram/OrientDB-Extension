@@ -27,6 +27,7 @@ class RequestCommand extends OperationAbstract
 
 	protected _query;
 	protected _class;
+	protected _autoDecode;
 
 	/**
 	 * Orientdb\Select constructor
@@ -82,7 +83,11 @@ class RequestCommand extends OperationAbstract
 	protected function parseResponse()
 	{
 		var status, result;
-		var recordsCount, record, records, resultType;
+		var recordsCount, fetchCount, record, records, fetchRecords, resultType;
+
+		if (this->parent->debug == true) {
+			syslog(LOG_DEBUG, "------------------------ PARSING RESPONSE ------------------------");
+		}
 
 		let status = this->readByte(this->socket);
 		let this->session = this->readInt(this->socket);
@@ -106,41 +111,59 @@ class RequestCommand extends OperationAbstract
 					}
 
 					let records = [];
+					let fetchRecords = [];
 					var pos;
 					for pos in range(1, recordsCount) {
 						if (this->parent->debug == true) {
+							syslog(LOG_DEBUG, "------------------------ NEW RECORD ------------------------");
 							syslog(LOG_DEBUG, __METHOD__ . " - record #" . pos);
 						}
 						let record = this->readRecord();
 						let records[] = record;
-						if (this->parent->debug == true) {
-							syslog(LOG_DEBUG, __METHOD__ . " - record data: " . json_encode(record));
-						}
-						//let records[] = this->readRecord();
 					}
 
 					let status = this->readByte(this->socket);
-
-					if (this->parent->debug == true) {
-						syslog(LOG_DEBUG, __METHOD__ . " - status 2: " . ord(status));
-					}
-
 					while (ord(status) != 0) {
-						let record = this->readRecord();
 						if (this->parent->debug == true) {
-							syslog(LOG_DEBUG, __METHOD__ . " - internal: " . json_encode(record));
+							syslog(LOG_DEBUG, __METHOD__ . " - status fetch: " . ord(status));
 						}
+
+						let record = this->readRecord();
+
 						if (ord(status) == 1) {
 							let records[] = record;
+						}
+						elseif (ord(status) == 2) {
+							let fetchRecords[] = record;
 						}
 						let status = this->readByte(this->socket);
 					}
 
+					let fetchCount = count(fetchRecords);
+					if (this->parent->debug == true) {
+						syslog(LOG_DEBUG, __METHOD__ . " - status fetch: " . ord(status));
+						syslog(LOG_DEBUG, __METHOD__ . " - Fetch records found: " . fetchCount);
+					}
+					if (fetchCount > 0) {
+						var posFetch, pattern, fetchRecord, fetchRecordTmp;
+						let recordsCount--;
+						let fetchCount--;
+						// aggressive fetchplan merge, search and replace all records with the retrieved fetch records
+						// TODO: find a better alternative for the cases of column-specific fetchplans
+						for pos in range(0, recordsCount) {
+							for posFetch in range(0, fetchCount) {
+								let fetchRecord = fetchRecords[posFetch];
+								let fetchRecordTmp = [];
+								let fetchRecordTmp = json_decode(fetchRecord->data->getJson(), true);
+								let fetchRecordTmp["@rid"] = fetchRecord->rid;
+								let pattern = "/\"" . fetchRecord->rid . "\"/";
+								records[pos]->data->replace($pattern, json_encode(fetchRecordTmp));
+							}
+						}
+					}
+
 					let result = records;
 
-                    if (this->parent->debug == true) {
-                        //syslog(LOG_DEBUG, __METHOD__ . " - Result: " . json_encode(result));
-                    }
 					break;
 
 				case "r":
@@ -150,9 +173,9 @@ class RequestCommand extends OperationAbstract
 
 					let result = (this->_class == "Command")? record[0] : record;
 
-                    if (this->parent->debug == true) {
-                        syslog(LOG_DEBUG, __METHOD__ . " - Result: " . json_encode(result));
-                    }
+					if (this->parent->debug == true) {
+						syslog(LOG_DEBUG, __METHOD__ . " - Result: " . json_encode(result));
+					}
 					break;
 
 				case "n":
@@ -160,27 +183,27 @@ class RequestCommand extends OperationAbstract
 					this->readByte(this->socket);
 					let result =  true;
 
-                    if (this->parent->debug == true) {
-                        syslog(LOG_DEBUG, __METHOD__ . " - Result: true");
-                    }
+					if (this->parent->debug == true) {
+						syslog(LOG_DEBUG, __METHOD__ . " - Result: true");
+					}
 					break;
 
 				case "a":
-					// Something other
+					// Other
 					var tmp;
 					let result = this->readString(this->socket);
-                    if (this->parent->debug == true) {
-                        syslog(LOG_DEBUG, __METHOD__ . " - Result: " . result);
-                    }
+					if (this->parent->debug == true) {
+						syslog(LOG_DEBUG, __METHOD__ . " - Result: " . result);
+					}
 					if (result == "true" || result == "false") {
 						let result = (result == "true")? true : false;
 					}
 
 					let tmp = this->readByte(this->socket);
 
-                    if (this->parent->debug == true) {
-                        syslog(LOG_DEBUG, __METHOD__ . " - " . tmp);
-                    }
+					if (this->parent->debug == true) {
+						syslog(LOG_DEBUG, __METHOD__ . " - " . tmp);
+					}
 					break;
 
 				default:
@@ -201,7 +224,7 @@ class RequestCommand extends OperationAbstract
 	 */
 	protected function readRecord()// -> OrientdbRecord
 	{
-		var marker, clusterID, recordPos, record;
+		var marker, record;
 
 		let marker = this->readShort(this->socket);
 		if (this->parent->debug == true) {
@@ -212,20 +235,28 @@ class RequestCommand extends OperationAbstract
 			return false;
 		}
 
-        if (marker == -3) {
-        	let clusterID = this->readShort(this->socket);
-			let recordPos = this->readLong(this->socket);
-		}
-
 		let record = new OrientdbRecord();
-		let record->type = this->readByte(this->socket);
-		let record->cluster = this->readShort(this->socket);
-		let record->position = this->readLong(this->socket);
-		let record->version = this->readInt(this->socket);
-		let record->content = this->readBytes(this->socket);
-		let record->data = new OrientdbRecordData(record->content, this->parent->debug);
-		if (this->parent->debug == true) {
-			syslog(LOG_DEBUG, __METHOD__ . " - data: " . json_encode(record));
+		if (marker == -3) {
+			let record->cluster = this->readShort(this->socket);
+			let record->position = this->readLong(this->socket);
+		}
+		else {
+			let record->type = this->readByte(this->socket);
+			let record->cluster = this->readShort(this->socket);
+			let record->position = this->readLong(this->socket);
+			let record->rid = "#" . record->cluster . ":" . record->position;
+			let record->version = this->readInt(this->socket);
+			let record->content = this->readBytes(this->socket);
+			if (this->parent->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " - @RID: " . record->rid);
+				syslog(LOG_DEBUG, __METHOD__ . " - Raw: " . record->content);
+			}
+			let record->data = new OrientdbRecordData(record->content, this->_autoDecode, this->parent->debug);
+			let record->classname = record->data->getClassName();
+			if (this->parent->debug == true) {
+				// all properties from 'record' are protected, the log will show empty
+				//syslog(LOG_DEBUG, __METHOD__ . " - data: " . json_encode(record));
+			}
 		}
 
 		return record;

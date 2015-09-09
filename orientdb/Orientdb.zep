@@ -46,6 +46,7 @@ class Orientdb
 	public socket;
 
 	public debug;
+	public autoDecode;
 	
 	/**
 	 * Orientdb\Orientdb constructor

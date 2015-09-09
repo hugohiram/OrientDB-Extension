@@ -28,7 +28,7 @@ class OrientdbRecord
 	// Position on cluster
 	protected position { set, get };
 	// ID of record
-	//protected id { set, get };
+	protected rid { set, get };
 	// version of the document
 	protected version { set, get };
 	// raw content of the record
@@ -37,8 +37,6 @@ class OrientdbRecord
 	protected extra { set, get };
 	// raw fetch of the record
 	protected fetched { set, get };
-	// 
-	//protected properties { set, get };
 	// decoded data
 	protected data { set, get };
 

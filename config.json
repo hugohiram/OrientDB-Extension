@@ -41,6 +41,6 @@
     "name": "OrientDB-Extension",
     "description": "OrientDB binary extension for PHP",
     "author": "Hugo Hiram",
-    "version": "0.8.3",
+    "version": "0.9",
     "verbose": false
 }

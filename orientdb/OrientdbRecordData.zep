@@ -27,13 +27,19 @@ class OrientdbRecordData
 	private content;
 	private isDecoded;
 	private debug;
+	private className;
 
 	/**
 	 * Orientdb\OrientdbRecordData constructor
 	 *
-	 * @param string content Content to decode
+	 * @param string  content     Content to decode
+	 * @param boolean autoDecode  If set to false, records won't decoded automatically, set it to true if records are
+	 *                            not going to be used, this will save some time on execution time in that case only
+	 * @param boolean debug       Enabled debug, write to syslog, "false" by default
+	 *
+	 * @return OrientdbRecordData
 	 */
-	public function __construct(content, boolean debug = false)
+	public function __construct(content, boolean autoDecode = true, boolean debug = false)
 	{
 		let this->isDecoded = false;
 		let this->content = content;
@@ -41,6 +47,11 @@ class OrientdbRecordData
 		let this->metadata = new stdClass();
 		let this->json = "";
 		let this->debug = debug;
+		let this->className = "";
+
+        if (autoDecode == true) {
+		    this->_decode();
+		}
 	}
 
 	/**
@@ -49,9 +60,9 @@ class OrientdbRecordData
 	 * @param string name  Name of the property
 	 * @param mixed  value Value of the property
 	 */
-	public function __set(name, value) -> void
+	public function __set(string name, value) -> void
 	{
-		//let this->data->{name} = value;
+	    //let this->data->{name} = value;
 	}
 
 	/**
@@ -81,12 +92,10 @@ class OrientdbRecordData
 	{
 		var decoder;
 		let decoder = new OrientdbRecordDataDecoder(this->content, this->debug);
-		let this->data = decoder->getJson(true);
-		let this->json = json_encode(this->data);
-		if (this->debug == true) {
-			syslog(LOG_DEBUG, __METHOD__ . " - json: " . this->json);
-		}
+		let this->json = decoder->getJson();
+		let this->data = json_decode(this->json);
 		let this->metadata = decoder->getMetadata();
+		let this->className = decoder->getClassname();
 
 		let this->isDecoded = true;		
 	}
@@ -108,5 +117,15 @@ class OrientdbRecordData
 	public function getMetadata() -> string
 	{
 		return this->metadata;
+	}
+
+	/**
+	 * Returns the name of the class
+	 *
+	 * @return string
+	 */
+	private function getClassname() -> string
+	{
+		return this->className;
 	}
 }

@@ -65,9 +65,6 @@ class OrientdbRecordDataDecoder
 		var response = [];
 		var e;
 		try {
-			if (this->debug == true) {
-				syslog(LOG_DEBUG, __METHOD__ . ": " . this->jsonContent);
-			}
 			if (asObject) {
 				let response = json_decode(trim(this->jsonContent));
 
@@ -105,15 +102,15 @@ class OrientdbRecordDataDecoder
 		var cChar, buffer, content;
 
 		// get the @class
-		let sTransformation = this->getClassname(sTransformation);
+		let sTransformation = this->detectClassname(sTransformation);
 		if (this->debug == true) {
-			syslog(LOG_DEBUG, __METHOD__ . " - data: " . sTransformation);
+			//syslog(LOG_DEBUG, __METHOD__ . " - data: " . sTransformation);
 		}
 
 		// list to array
 		let sTransformation = this->convertSetToList(sTransformation);
 		if (this->debug == true) {
-			syslog(LOG_DEBUG, __METHOD__ . " - data: " . sTransformation);
+			//syslog(LOG_DEBUG, __METHOD__ . " - data: " . sTransformation);
 		}
 
 		// RID link to string, RID linksets to string
@@ -141,7 +138,7 @@ class OrientdbRecordDataDecoder
 			}
 			else {
 				if (this->debug == true) {
-					syslog(LOG_DEBUG, __METHOD__ . " - character found: " . cChar);
+					//syslog(LOG_DEBUG, __METHOD__ . " - character found: " . cChar);
 				}
 				if (end(this->element) == self::VALUE) {
 					let content = substr(sTransformation, this->position);
@@ -209,10 +206,6 @@ class OrientdbRecordDataDecoder
 		array_pop(this->element);
 
 		this->closeJson();
-
-		if (this->debug == true) {
-			syslog(LOG_DEBUG, __METHOD__ . " - JSON: " . this->jsonContent);
-		}
 	}
 
 	/**
@@ -243,6 +236,10 @@ class OrientdbRecordDataDecoder
 		let this->jsonContent = str_replace("\r", "\\r", this->jsonContent);
 
 		let this->jsonContent = "{" . this->jsonContent . "}";
+		
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ . " - Final JSON: " . this->jsonContent);
+ 		}
 	}
 
 	/**
@@ -251,7 +248,7 @@ class OrientdbRecordDataDecoder
 	 * @param string content Content to parse
 	 * @return string
 	 */
-	private function getClassname(content) -> string
+	private function detectClassname(content) -> string
 	{
 		var pos_colon, pos_at, key;
 		let pos_colon = strpos(content, ":");		
@@ -778,6 +775,16 @@ class OrientdbRecordDataDecoder
 		if !empty propertyName {
 			let this->metadata[propertyName] = datatype;
 		}
+	}
+
+	/**
+	 * Returns the name of the class
+	 *
+	 * @return string
+	 */
+	private function getClassname() -> string
+	{
+		return this->className;
 	}
 
 }
