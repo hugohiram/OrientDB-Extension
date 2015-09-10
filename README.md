@@ -1,7 +1,9 @@
 # OrientDB-Extension
 ==================
 
-An [OrientDB](https://github.com/nuvolabase/orientdb) binary extension for PHP written in [Zephir](http://zephir-lang.com/) language. Go to the [wiki](https://github.com/hugohiram/OrientDB-Extension/wiki) to know more. Just want to download and test the extension? [download it from here](https://github.com/hugohiram/OrientDB-Extension/blob/master/ext/modules). 
+An [OrientDB](https://github.com/nuvolabase/orientdb) binary extension for PHP written in [Zephir](http://zephir-lang.com/) language. Go to the [wiki](https://github.com/hugohiram/OrientDB-Extension/wiki) to know more. Just want to download and test the extension? [download it from here](https://github.com/hugohiram/OrientDB-Extension/blob/master/ext/modules).
+
+Go [here](https://github.com/hugohiram/OrientDB-Extension/wiki/Index) to get the full list of supported methods and examples on how to use them.
 
 ## Description ##
 
@@ -45,3 +47,7 @@ Install composer, go to the root of the project:
 To run the tests, go to the root of the project;
 
     phpunit tests/
+
+## Contribute ##
+
+Any help is appreciated, thorough testing on complex schemas is required, as well as unit testing and performance tests.
