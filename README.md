@@ -7,7 +7,7 @@ Go [here](https://github.com/hugohiram/OrientDB-Extension/wiki/Index) to get the
 
 ## Description ##
 
-The current version is 0.9, the status is considered as *Beta*, the development covers most of the features that are documented by the OrientDB binary documentation, with the exception of the Transactions. This is a port from Anton Terekhov's [OrientDB-PHP](https://github.com/AntonTerekhov/OrientDB-PHP) driver.
+The current version is 0.9.1, the status is considered as *Beta*, the development covers most of the features that are documented by the OrientDB binary documentation, with the exception of the Transactions. This is a port from Anton Terekhov's [OrientDB-PHP](https://github.com/AntonTerekhov/OrientDB-PHP) driver.
 
 The purpose of this development is to have a fast and simple PHP extension, it is intended only for document databases, initially graph databases will not be supported.
 
@@ -25,7 +25,7 @@ This extension requires:
     * PCRE extension
     * JSON extension (php5-json)
     * PHP development headers and tools (php5-dev)
-* [Zephir 0.7.1b ](http://zephir-lang.com/install.html)
+* [Zephir v0.8.0a](http://zephir-lang.com/install.html)
 
 Haven't tried in a PHP 5.3.x installation.
 
