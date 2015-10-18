@@ -106,6 +106,7 @@ class OrientdbRecordData
 	public function replace(string regex, string replacement) -> void
 	{
 		let this->json = preg_replace(regex, replacement, this->json);
+        let this->json = preg_replace("/(\\\\+)/", "\\\\\\", this->json);
 		let this->data = json_decode(this->json);
 	}
 
