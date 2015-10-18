@@ -28,7 +28,7 @@ class Orientdb
 	const SERIALIZATION_BINARY	= "ORecordSerializerBinary";
 
 	public driverName = "PHP-Extension";
-	public driverVersion = "0.6";
+	public driverVersion = "0.9.1";
 	public protocolVersion = 26;
 	public clientId = null;
 	public serialization;
@@ -348,17 +348,19 @@ class Orientdb
 	 * @param long    position    Limit on the query, by default limit from query
 	 * @param string  fetchplan   Fetchplan, no fetchplan by default
 	 * @param boolean mergefetch  Merge fetchedplan data into the record
+	 * @param boolean autoDecode  If set to false, records won't decoded automatically, set it to true if records are
+	 *                            not going to be used, this will save some time on execution time in that case only
 	 * @param boolean ignoreCache If the cache must be ignored: true = ignore the cache, false = not ignore
 	 * @return array
 	 */
-	public function recordLoad(int cluster, long position, string fetchplan = "*:0", boolean mergefetch = false, boolean ignoreCache = false) -> array
+	public function recordLoad(int cluster, long position, string fetchplan = "*:0", boolean mergefetch = false, boolean autoDecode = true, boolean ignoreCache = false) -> array
 	{
 		this->canPerformDatabaseOperation();
 
 		var resourceClass;
 		let resourceClass = new RecordLoad(this);
 
-		return resourceClass->run(cluster, position, fetchplan, mergefetch, ignoreCache);
+		return resourceClass->run(cluster, position, fetchplan, mergefetch, autoDecode, ignoreCache);
 	}
 
 	/**

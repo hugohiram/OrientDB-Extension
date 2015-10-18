@@ -28,6 +28,7 @@ class RecordLoad extends OperationAbstract
 	protected _fetchplan;
 	protected _ignoreCache;
 	protected _mergefetch;
+	protected _autoDecode;
 
 	/**
 	 * Orientdb\RecordLoad constructor
@@ -54,15 +55,18 @@ class RecordLoad extends OperationAbstract
 	 * @param int     position    Limit on the query, by default limit from query
 	 * @param string  fetchplan   Fetchplan, no fetchplan by default
 	 * @param boolean mergefetch  Merge fetchedplan data into the record
+	 * @param boolean autoDecode  If set to false, records won't decoded automatically, set it to true if records are
+	 *                            not going to be used, this will save some time on execution time in that case only
 	 * @param boolean ignoreCache If the cache must be ignored: true = ignore the cache, false = not ignore
 	 * @return array
 	 */
-	public function run(int cluster, int position, string fetchplan, boolean mergefetch, boolean ignoreCache) -> array
+	public function run(int cluster, int position, string fetchplan, boolean mergefetch, boolean autoDecode, boolean ignoreCache) -> array
 	{
 		let this->_cluster = cluster;
 		let this->_position = position;
 		let this->_fetchplan = fetchplan;
 		let this->_mergefetch = mergefetch;
+		let this->_autoDecode = autoDecode;
 		let this->_ignoreCache = ignoreCache;
 
 		this->prepare();
@@ -144,7 +148,7 @@ class RecordLoad extends OperationAbstract
 						let record->type = this->readByte(this->socket);
 					}
 
-					let record->data = new OrientdbRecordData(record->content, this->parent->debug);
+					let record->data = new OrientdbRecordData(record->content, this->_autoDecode, this->parent->debug);
 				}
 				else {
 					var fetched;
@@ -155,7 +159,7 @@ class RecordLoad extends OperationAbstract
 					let fetched->position = this->readLong(this->socket);
 					let fetched->version = this->readInt(this->socket);
 					let fetched->content = this->readBytes(this->socket);
-					let fetched->data = new OrientdbRecordData(fetched->content, this->parent->debug);
+					let fetched->data = new OrientdbRecordData(fetched->content, this->_autoDecode, this->parent->debug);
 
 					let record->fetched[] = fetched;
 
