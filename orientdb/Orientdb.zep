@@ -138,14 +138,14 @@ class Orientdb
 	 * @param string  serverUser Username to connect to the OrientDB server
 	 * @param string  serverPass Password to connect to the OrientDB server
 	 * @param boolean stateless  Set a stateless connection using a token based session
-	 * @return void
+	 * @return boolean
 	 */
-	public function Connect(string serverUser, string serverPass, boolean stateless = false) -> void
+	public function Connect(string serverUser, string serverPass, boolean stateless = false) -> boolean
 	{
 		var resourceClass;
 		let resourceClass = new Connect(this);
 
-		resourceClass->run(serverUser, serverPass, stateless);
+		return resourceClass->run(serverUser, serverPass, stateless);
 	}
 
 	/**

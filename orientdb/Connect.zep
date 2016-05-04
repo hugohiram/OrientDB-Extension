@@ -45,9 +45,9 @@ class Connect extends OperationAbstract
 	 * @param string  serverUser Username to connect to the OrientDB server
 	 * @param string  serverPass Password to connect to the OrientDB server
 	 * @param boolean stateless  Set a stateless connection using a token based session
-	 * @return string
+	 * @return boolean
 	 */
-	public function run(string serverUser, string serverPass, boolean stateless) -> string
+	public function run(string serverUser, string serverPass, boolean stateless) -> boolean
 	{
 		let this->_serverUser = serverUser;
 		let this->_serverPass = serverPass;
@@ -102,12 +102,13 @@ class Connect extends OperationAbstract
 	 */
 	protected function parseResponse() -> void
 	{
-		var protocol, status, transaction, token;
+		var protocol, status, transaction, token, errorMessage;
 
 		if (this->session <= 0) {
 			let protocol = this->readShort(this->socket);
 			if (protocol < this->parent->protocolVersion) {
-				throw new OrientdbException("Database Server does not support protocol version " . protocol . ", max version allowed is v.". (string)protocol, 400);
+				let errorMessage = "Database Server does not support protocol version " . protocol . ", max version allowed is v.". (string)this->parent->protocolVersion;
+				throw new OrientdbException(errorMessage , 400);
 			}
 		}
 		let status = this->readByte(this->socket);
@@ -125,6 +126,8 @@ class Connect extends OperationAbstract
 			}
 
 			this->parent->setConnectStatus(true);
+
+			let this->response = true;
 		}
 		else {
 			if (status == (chr(OperationAbstract::STATUS_ERROR))) {
