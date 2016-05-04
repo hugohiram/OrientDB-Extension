@@ -120,7 +120,7 @@ class OrientdbRecordDataDecoder
 		}
 
 		let contentLength = strlen(sTransformation);
-		array_push(this->element, self::PROPERTY);
+		let this->element[] = self::PROPERTY;
 
 		while (this->index <= contentLength) {
 			let cChar = substr(sTransformation, this->index, 1);
@@ -134,7 +134,7 @@ class OrientdbRecordDataDecoder
 					syslog(LOG_DEBUG, __METHOD__ . " - Property Name: " . this->property);
 				}
 
-				array_push(this->element, self::VALUE);
+				let this->element[] = self::VALUE;
 			}
 			else {
 				if (this->debug == true) {
