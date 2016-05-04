@@ -103,6 +103,16 @@ class Orientdb
 		let this->protocolVersion = protocolVersion;
 	}
 
+	/**
+	 * Get protocol version
+	 *
+	 * @return int
+	 */
+	public function getProtocolVersion() -> int
+	{
+		return this->protocolVersion;
+	}
+
 	/////////////////////////////////////////
 	//     Server (CONNECT Operations)     //
 	/////////////////////////////////////////
