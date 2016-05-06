@@ -68,20 +68,27 @@ class DBList extends OperationAbstract
 	 * 
 	 * @return array
 	 */
-	protected function parseResponse() ->array
+	protected function parseResponse() -> array
 	{
-		var status, content, decoder, databases;
+		var status, content, databases;
+		var contentJson, posl, posr;
 
+		let databases = [];
 		let status = this->readByte(this->socket);
 		let this->session = this->readInt(this->socket);
 		this->parent->setSession(this->session);
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 			let content = this->readString(this->socket);
-			let decoder = new OrientdbRecordDataDecoder(content);
-			let databases = get_object_vars(decoder->getJson(true)->databases);
 
-			return databases;
+			let posl = strpos(content, "{");
+			let posr = strripos(content, "}");
+
+			let contentJson = substr(content, posl, posr);
+
+			if !empty content {
+				let databases = json_decode(contentJson);
+			}
 		}
 		else {
 			if (status == (chr(OperationAbstract::STATUS_ERROR))) {
@@ -89,6 +96,6 @@ class DBList extends OperationAbstract
 			}
 		}
 
-		return [];
+		return databases;
 	}
 }
