@@ -11,6 +11,7 @@
 namespace Orientdb;
 
 use stdClass;
+use Exception;
 
 /**
  * OrientdbRecordData for OrientDB
@@ -90,14 +91,46 @@ class OrientdbRecordData
 	 */
 	private function _decode() -> void
 	{
+		var e;
 		var decoder;
-		let decoder = new OrientdbRecordDataDecoder(this->content, this->debug);
-		let this->json = decoder->getJson();
-		let this->data = json_decode(this->json);
-		let this->metadata = decoder->getMetadata();
-		let this->className = decoder->getClassname();
+	    try {
+            if (this->debug == true) {
+                syslog(LOG_DEBUG, __METHOD__ . " - Start");
+            }
 
-		let this->isDecoded = true;		
+            let decoder = new OrientdbRecordDataDecoder(this->content, this->debug);
+            if (this->debug == true) {
+                syslog(LOG_DEBUG, __METHOD__ . " - getJson");
+            }
+            let this->json = decoder->getJson();
+
+            if (this->debug == true) {
+                syslog(LOG_DEBUG, __METHOD__ . " - json_decode");
+            }
+            let this->data = json_decode(this->json, true);
+
+            if (this->debug == true) {
+                syslog(LOG_DEBUG, __METHOD__ . " - getMetadata");
+            }
+            let this->metadata = decoder->getMetadata();
+
+            if (this->debug == true) {
+                syslog(LOG_DEBUG, __METHOD__ . " - getClassname");
+            }
+            let this->className = decoder->getClassname();
+
+            if (this->debug == true) {
+                syslog(LOG_DEBUG, __METHOD__ . " - End");
+            }
+
+            let this->isDecoded = true;
+		} catch \Exception, e {
+			if (this->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " EXCEPTION: " . e->getMessage());
+			}
+
+			let this->isDecoded = false;
+		}
 	}
 
 	/**

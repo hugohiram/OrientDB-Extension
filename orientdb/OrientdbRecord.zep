@@ -97,6 +97,9 @@ class OrientdbRecord
 		}
 
 		if (count(this->fetched) > 0) {
+		    if (this->debug == true) {
+        		syslog(LOG_DEBUG, __METHOD__ . " - records to merge: " . count(this->fetched));
+        	}
 			for item in this->fetched {
 				var regex, rid;
 

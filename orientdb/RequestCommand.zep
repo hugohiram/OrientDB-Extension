@@ -120,6 +120,9 @@ class RequestCommand extends OperationAbstract
 						}
 						let record = this->readRecord();
 						let records[] = record;
+						if (this->parent->debug == true) {
+							syslog(LOG_DEBUG, "------------------------ END RECORD ------------------------");
+						}
 					}
 
 					let status = this->readByte(this->socket);
@@ -210,6 +213,10 @@ class RequestCommand extends OperationAbstract
 					throw new OrientdbException("unknown response", 400);
 			}
 
+			if (this->parent->debug == true) {
+			    syslog(LOG_DEBUG, "------------------------ PARSING RESPONSE END ------------------------");
+    		}
+
 			return result;
 		}
 		else {
@@ -224,6 +231,9 @@ class RequestCommand extends OperationAbstract
 	 */
 	protected function readRecord()// -> OrientdbRecord
 	{
+		if (this->parent->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ );
+		}
 		var marker, record;
 
 		let marker = this->readShort(this->socket);
@@ -257,6 +267,9 @@ class RequestCommand extends OperationAbstract
 				// all properties from 'record' are protected, the log will show empty
 				//syslog(LOG_DEBUG, __METHOD__ . " - data: " . json_encode(record));
 			}
+		}
+		if (this->parent->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ . " - End" );
 		}
 
 		return record;

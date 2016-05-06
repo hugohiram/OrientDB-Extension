@@ -35,6 +35,10 @@ class Connect extends OperationAbstract
 		//echo __CLASS__;
 		let this->parent = parent;
 		let this->socket = parent->socket;
+		if (this->parent->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__);
+		}
+
 		let this->session = this->parent->getSession();
 		let this->operation = OperationAbstract::REQUEST_CONNECT;
 	}
@@ -104,24 +108,48 @@ class Connect extends OperationAbstract
 	{
 		var protocol, status, transaction, token, errorMessage;
 
+		if (this->parent->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ . " Session: " . this->session);
+		}
+
 		if (this->session <= 0) {
 			let protocol = this->readShort(this->socket);
+			if (this->parent->debug == true) {
+			  	syslog(LOG_DEBUG, __METHOD__ . " protocol server: " . protocol);
+			  	syslog(LOG_DEBUG, __METHOD__ . " protocol client: " . this->parent->protocolVersion);
+			}
 			if (protocol < this->parent->protocolVersion) {
 				let errorMessage = "Database Server does not support protocol version " . protocol . ", max version allowed is v.". (string)this->parent->protocolVersion;
+				if (this->parent->debug == true) {
+					syslog(LOG_DEBUG, __METHOD__ . " protocol error: " . errorMessage);
+				}
 				throw new OrientdbException(errorMessage , 400);
 			}
 		}
 		let status = this->readByte(this->socket);
+		if (this->parent->debug == true) {
+		  	syslog(LOG_DEBUG, __METHOD__ . " status: " . status);
+		}
+
 		let transaction = this->readInt(this->socket);
+		if (this->parent->debug == true) {
+		  	syslog(LOG_DEBUG, __METHOD__ . " transaction: " . transaction);
+		}
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
 			let this->session = this->readInt(this->socket);
 			this->parent->setSession(this->session);
+			if (this->parent->debug == true) {
+		 	 	syslog(LOG_DEBUG, __METHOD__ . " session: " . this->session);
+			}
 
 			if (this->parent->protocolVersion > 26) {
 				let token = this->readBytes(this->socket);
 				if !empty token {
 					this->parent->setToken(token);
+					if (this->parent->debug == true) {
+		 			 	syslog(LOG_DEBUG, __METHOD__ . " token: " . token);
+					}
 				}
 			}
 
@@ -130,6 +158,9 @@ class Connect extends OperationAbstract
 			let this->response = true;
 		}
 		else {
+			If (this->parent->debug == true) {
+		 		syslog(LOG_DEBUG, __METHOD__ . " Connect error: ");
+			}
 			if (status == (chr(OperationAbstract::STATUS_ERROR))) {
 				this->handleException(401);
 			}

@@ -34,6 +34,10 @@ class DBList extends OperationAbstract
 		let this->socket = parent->socket;
 
 		let this->operation = OperationAbstract::REQUEST_DB_LIST;
+
+		if (this->parent->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__);
+		}
 	}
 
 	/**
@@ -79,12 +83,28 @@ class DBList extends OperationAbstract
 		this->parent->setSession(this->session);
 
 		if (status == (chr(OperationAbstract::STATUS_SUCCESS))) {
+			if (this->parent->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " status: ok");
+			}
+
 			let content = this->readString(this->socket);
+			if (this->parent->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " content: " . content);
+			}
 
 			let posl = strpos(content, "{");
 			let posr = strripos(content, "}");
 
+			if (this->parent->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " content posl: " . posl);
+				syslog(LOG_DEBUG, __METHOD__ . " content posr: " . posr);
+			}
+
 			let contentJson = substr(content, posl, posr);
+
+			if (this->parent->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " content JSON: " . contentJson);
+			}
 
 			if !empty content {
 				let databases = json_decode(contentJson);
