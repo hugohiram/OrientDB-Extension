@@ -40,18 +40,26 @@ class OrientdbRecordDataDecoder
 	 *
 	 * @param string content Content to decode
 	 */
-	public function __construct(content, boolean debug = false)
+	public function __construct(string content, boolean debug = false)
 	{
-		let this->content = content;
-		let this->position = 0;
-		let this->index = 0;
-		let this->jsonContent = "";
-		let this->element = [];
-		let this->property = "";
-		let this->metadata = new stdClass();
-		let this->debug = debug;
+	    var e;
+		try {
+			let this->debug = debug;
+			let this->content = content;
+			let this->position = 0;
+			let this->index = 0;
+			let this->jsonContent = "";
+			let this->element = [];
+			let this->property = "";
 
-		this->decode(this->content);
+			let this->metadata = [];
+
+			this->decode(this->content);
+		} catch \Exception, e {
+			//if (this->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " EXCEPTION: " . e->getMessage());
+			//}
+		}
 	}
 
 	/**
@@ -250,13 +258,13 @@ class OrientdbRecordDataDecoder
 	 */
 	private function detectClassname(content) -> string
 	{
-		var pos_colon, pos_at, key;
-		let pos_colon = strpos(content, ":");		
+		var pos_colon, pos_at, key, result;
+		let pos_colon = strpos(content, ":");
 		let pos_at = strpos(content, "@");
 		if (pos_at !== false && pos_at < pos_colon) {
 			let key = substr(content, 0, pos_at);
 			let this->className = key;
-			let content = substr(content, strlen(key) + 1);
+			let result = substr(content, strlen(key) + 1);
 
 			this->buildJson("@class", true);
 			this->buildJson(":");
@@ -267,7 +275,7 @@ class OrientdbRecordDataDecoder
 			}
 		}
 
-		return content;
+		return result;
 	}
 
 	/**
@@ -761,15 +769,20 @@ class OrientdbRecordDataDecoder
 		return buffer;
 	}
 
-
-	protected function setMetadata(datatype)
+	/**
+	 * Sets the datatype on the datatypes object
+	 *
+	 * @param string datatype Datatype of the property
+	 * @return void
+	 */
+	private function setMetadata(string datatype) -> void
 	{
 		//syslog(LOG_DEBUG, __METHOD__ . " - metadata: " . datatype);
 		var cChar, propertyName;
 		let propertyName = this->property;
 		let cChar = substr(propertyName, 0, 1);
 		if (cChar == "@") {
-			return null;
+			return;
 		}
 
 		if !empty propertyName {
