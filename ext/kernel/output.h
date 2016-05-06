@@ -3,7 +3,7 @@
   +------------------------------------------------------------------------+
   | Zephir Language                                                        |
   +------------------------------------------------------------------------+
-  | Copyright (c) 2011-2015 Zephir Team (http://www.zephir-lang.com)       |
+  | Copyright (c) 2011-2016 Zephir Team (http://www.zephir-lang.com)       |
   +------------------------------------------------------------------------+
   | This source file is subject to the New BSD License that is bundled     |
   | with this package in the file docs/LICENSE.txt.                        |
@@ -22,13 +22,5 @@
 #define ZEPHIR_KERNEL_OUTPUT_H
 
 #include <php.h>
-
-void zephir_ob_start(TSRMLS_D);
-void zephir_ob_get_contents(zval *result TSRMLS_DC);
-int zephir_ob_end_flush(TSRMLS_D);
-int zephir_ob_end_clean(TSRMLS_D);
-int zephir_ob_flush(TSRMLS_D);
-int zephir_ob_clean(TSRMLS_D);
-int zephir_ob_get_level(TSRMLS_D);
 
 #endif

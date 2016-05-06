@@ -3,7 +3,7 @@
   +------------------------------------------------------------------------+
   | Zephir Language                                                        |
   +------------------------------------------------------------------------+
-  | Copyright (c) 2011-2015 Zephir Team (http://www.zephir-lang.com)       |
+  | Copyright (c) 2011-2016 Zephir Team (http://www.zephir-lang.com)       |
   +------------------------------------------------------------------------+
   | This source file is subject to the New BSD License that is bundled     |
   | with this package in the file docs/LICENSE.txt.                        |
@@ -22,17 +22,10 @@
 
 #include <php.h>
 
-/** Low level filters */
 void zephir_filter_alphanum(zval *return_value, zval *param);
-void zephir_filter_identifier(zval *return_value, zval *param);
-
-/** Encoding */
 void zephir_is_basic_charset(zval *return_value, const zval *param);
-
-/** Escaping */
-void zephir_escape_css(zval *return_value, zval *param);
+void zephir_escape_multi(zval *return_value, zval *param, const char *escape_char, unsigned int escape_length, char escape_extra, int use_whitelist);
 void zephir_escape_js(zval *return_value, zval *param);
-void zephir_escape_htmlattr(zval *return_value, zval *param);
-void zephir_escape_html(zval *return_value, zval *str, zval *quote_style, zval *charset TSRMLS_DC);
+void zephir_escape_css(zval *return_value, zval *param);
 
 #endif

@@ -3,7 +3,7 @@
 	+------------------------------------------------------------------------+
 	| Zephir Language                                                        |
 	+------------------------------------------------------------------------+
-	| Copyright (c) 2011-2015 Zephir Team  (http://www.zephir-lang.com)      |
+	| Copyright (c) 2011-2016 Zephir Team  (http://www.zephir-lang.com)      |
 	+------------------------------------------------------------------------+
 	| This source file is subject to the New BSD License that is bundled     |
 	| with this package in the file docs/LICENSE.txt.                        |
@@ -24,6 +24,21 @@
 #include <php.h>
 #include <Zend/zend.h>
 
-zend_object_iterator *zephir_get_iterator(zval *iterator TSRMLS_DC);
+zend_object_iterator *zephir_get_iterator(zval *iterator);
+
+#define ZEPHIR_ITERATOR_COPY(var, it) \
+	{ \
+		zval *ZEPHIR_TMP_ITERATOR_PTR; \
+		ZEPHIR_TMP_ITERATOR_PTR = it->funcs->get_current_data(it); \
+		if (UNEXPECTED(EG(exception) != NULL)) { \
+			return; \
+		} \
+		ZEPHIR_INIT_NVAR(var); \
+		if (Z_ISREF_P(var)) { \
+			ZVAL_DUP(var, Z_REFVAL_P(var)); \
+		} else { \
+			ZVAL_COPY(var, ZEPHIR_TMP_ITERATOR_PTR); \
+		} \
+	}
 
 #endif
