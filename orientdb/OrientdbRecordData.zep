@@ -25,7 +25,7 @@ class OrientdbRecordData
 	private data;
 	private metadata;
 	private json;
-	private content;
+	private raw;
 	private isDecoded;
 	private debug;
 	private className;
@@ -37,21 +37,19 @@ class OrientdbRecordData
 	 * @param boolean autoDecode  If set to false, records won't decoded automatically, set it to true if records are
 	 *                            not going to be used, this will save some time on execution time in that case only
 	 * @param boolean debug       Enabled debug, write to syslog, "false" by default
-	 *
-	 * @return OrientdbRecordData
 	 */
 	public function __construct(content, boolean autoDecode = true, boolean debug = false)
 	{
 		let this->isDecoded = false;
-		let this->content = content;
+		let this->raw = content;
 		let this->data = new stdClass();
-		let this->metadata = new stdClass();
+		let this->metadata = [];
 		let this->json = "";
 		let this->debug = debug;
 		let this->className = "";
 
-        if (autoDecode == true) {
-		    this->_decode();
+		if (autoDecode == true) {
+			this->_decode();
 		}
 	}
 
@@ -63,7 +61,11 @@ class OrientdbRecordData
 	 */
 	public function __set(string name, value) -> void
 	{
-	    //let this->data->{name} = value;
+		var tmpData;
+		let tmpData = this->data;
+		let tmpData->{name} = value;
+
+		let this->data = tmpData;
 	}
 
 	/**
@@ -74,6 +76,11 @@ class OrientdbRecordData
 	 */
 	public function __get(name)
 	{
+		syslog(LOG_DEBUG, __METHOD__ . " - " . name );
+		if name == "metadata" {
+			return this->getMetadata();
+		}
+
 		if (!this->isDecoded) {
 			//decode
 			this->_decode();
@@ -81,6 +88,10 @@ class OrientdbRecordData
 
 		if isset this->data->{name} {
 			return this->data->{name};
+		}
+
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ . " - " . name . ": null");
 		}
 
 		return null;
@@ -93,37 +104,37 @@ class OrientdbRecordData
 	{
 		var e;
 		var decoder;
-	    try {
-            if (this->debug == true) {
-                syslog(LOG_DEBUG, __METHOD__ . " - Start");
-            }
+		try {
+			if (this->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " - Start");
+			}
 
-            let decoder = new OrientdbRecordDataDecoder(this->content, this->debug);
-            if (this->debug == true) {
-                syslog(LOG_DEBUG, __METHOD__ . " - getJson");
-            }
-            let this->json = decoder->getJson();
+			let decoder = new OrientdbRecordDataDecoder(this->raw, this->debug);
+			if (this->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " - getJson");
+			}
+			let this->json = decoder->getJson();
 
-            if (this->debug == true) {
-                syslog(LOG_DEBUG, __METHOD__ . " - json_decode");
-            }
-            let this->data = json_decode(this->json, true);
+			if (this->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " - json_decode");
+			}
+			let this->data = json_decode(this->json);
 
-            if (this->debug == true) {
-                syslog(LOG_DEBUG, __METHOD__ . " - getMetadata");
-            }
-            let this->metadata = decoder->getMetadata();
+			if (this->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " - getMetadata");
+			}
+			let this->metadata = decoder->getMetadata();
 
-            if (this->debug == true) {
-                syslog(LOG_DEBUG, __METHOD__ . " - getClassname");
-            }
-            let this->className = decoder->getClassname();
+			if (this->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " - getClassname");
+			}
+			let this->className = decoder->getClassname();
 
-            if (this->debug == true) {
-                syslog(LOG_DEBUG, __METHOD__ . " - End");
-            }
+			if (this->debug == true) {
+				syslog(LOG_DEBUG, __METHOD__ . " - End, record decoded");
+			}
 
-            let this->isDecoded = true;
+			let this->isDecoded = true;
 		} catch \Exception, e {
 			if (this->debug == true) {
 				syslog(LOG_DEBUG, __METHOD__ . " EXCEPTION: " . e->getMessage());
@@ -139,7 +150,7 @@ class OrientdbRecordData
 	public function replace(string regex, string replacement) -> void
 	{
 		let this->json = preg_replace(regex, replacement, this->json);
-        let this->json = preg_replace("/(\\\\+)/", "\\\\\\", this->json);
+		let this->json = preg_replace("/(\\\\+)/", "\\\\\\", this->json);
 		let this->data = json_decode(this->json);
 	}
 
@@ -148,8 +159,16 @@ class OrientdbRecordData
 		return this->json;
 	}
 
-	public function getMetadata() -> string
+    /**
+     * Return metadata
+     *
+     * @return array
+     */
+	public function getMetadata() -> array
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ );
+		}
 		return this->metadata;
 	}
 
@@ -160,6 +179,9 @@ class OrientdbRecordData
 	 */
 	private function getClassname() -> string
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ );
+		}
 		return this->className;
 	}
 }

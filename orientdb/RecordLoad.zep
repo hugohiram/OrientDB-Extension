@@ -131,7 +131,7 @@ class RecordLoad extends OperationAbstract
 					if (this->parent->debug == true) {
 						syslog(LOG_DEBUG, __METHOD__ . " - Record found");
 					}
-					let record = new OrientdbRecord(this->parent->debug);
+					let record = new OrientdbRecord(this->_autoDecode, this->parent->debug);
 					let record->cluster = this->_cluster;
 					let record->position = this->_position;
 
@@ -139,32 +139,30 @@ class RecordLoad extends OperationAbstract
 						//[(payload-status:byte)[(record-type:byte)(record-version:int)(record-content:bytes)]*]+
 						let record->type = this->readByte(this->socket);
 						let record->version = this->readInt(this->socket);
-						let record->content = this->readBytes(this->socket);
+						let record->raw = this->readBytes(this->socket);
 					}
 					else {
 						//[(payload-status:byte)[(record-content:bytes)(record-version:int)(record-type:byte)]*]+
-						let record->content = this->readBytes(this->socket);
+						let record->raw = this->readBytes(this->socket);
 						let record->version = this->readInt(this->socket);
 						let record->type = this->readByte(this->socket);
 					}
-
-					let record->data = new OrientdbRecordData(record->content, this->_autoDecode, this->parent->debug);
 				}
 				else {
-					var fetched;
-					let fetched = new OrientdbRecord(this->parent->debug);
+					var fetched, raw;
+					let fetched = new OrientdbRecord(true, this->parent->debug);
 					let fetched->extra = this->readShort(this->socket);
 					let fetched->type = this->readByte(this->socket);
 					let fetched->cluster = this->readShort(this->socket);
 					let fetched->position = this->readLong(this->socket);
 					let fetched->version = this->readInt(this->socket);
-					let fetched->content = this->readBytes(this->socket);
-					let fetched->data = new OrientdbRecordData(fetched->content, this->_autoDecode, this->parent->debug);
+					let raw = this->readBytes(this->socket);
+					let fetched->raw = raw;
 
 					let record->fetched[] = fetched;
 
 					if (this->parent->debug == true) {
-						syslog(LOG_DEBUG, __METHOD__ . " - Fetch: " . fetched->content);
+						syslog(LOG_DEBUG, __METHOD__ . " - Fetch: " . raw);
 					}
 				}
 

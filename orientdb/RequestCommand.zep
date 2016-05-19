@@ -155,12 +155,24 @@ class RequestCommand extends OperationAbstract
 						// TODO: find a better alternative for the cases of column-specific fetchplans
 						for pos in range(0, recordsCount) {
 							for posFetch in range(0, fetchCount) {
+								if (this->parent->debug == true) {
+									syslog(LOG_DEBUG, __METHOD__ . " - Fetching record: " . posFetch);
+								}
 								let fetchRecord = fetchRecords[posFetch];
-								let fetchRecordTmp = [];
-								let fetchRecordTmp = json_decode(fetchRecord->data->getJson(), true);
-								let fetchRecordTmp["@rid"] = fetchRecord->rid;
-								let pattern = "/\"" . fetchRecord->rid . "\"/";
-								records[pos]->data->replace($pattern, json_encode(fetchRecordTmp));
+
+								var rid;
+								let rid = "#" . fetchRecord->cluster . ":" . fetchRecord->position;
+
+								let fetchRecordTmp = json_decode(fetchRecord->data->getJson());
+								let fetchRecordTmp->{"@rid"} = rid;
+								let pattern = "/\"" . rid . "\"/";
+
+								if (this->parent->debug == true) {
+									syslog(LOG_DEBUG, __METHOD__ . " - replacing pattern: " . pattern);
+									syslog(LOG_DEBUG, __METHOD__ . " - replacing with: " . fetchRecord->data->getJson());
+								}
+
+								records[pos]->data->replace($pattern, json_encode(fetchRecordTmp, JSON_UNESCAPED_UNICODE));
 							}
 						}
 					}
@@ -177,7 +189,7 @@ class RequestCommand extends OperationAbstract
 					let result = (this->_class == "Command")? record[0] : record;
 
 					if (this->parent->debug == true) {
-						syslog(LOG_DEBUG, __METHOD__ . " - Result: " . json_encode(result));
+						syslog(LOG_DEBUG, __METHOD__ . " - Result: " . json_encode(result, JSON_UNESCAPED_UNICODE));
 					}
 					break;
 
@@ -214,8 +226,8 @@ class RequestCommand extends OperationAbstract
 			}
 
 			if (this->parent->debug == true) {
-			    syslog(LOG_DEBUG, "------------------------ PARSING RESPONSE END ------------------------");
-    		}
+				syslog(LOG_DEBUG, "------------------------ PARSING RESPONSE END ------------------------");
+			}
 
 			return result;
 		}
@@ -245,7 +257,7 @@ class RequestCommand extends OperationAbstract
 			return false;
 		}
 
-		let record = new OrientdbRecord();
+		let record = new OrientdbRecord(true, this->parent->debug);
 		if (marker == -3) {
 			let record->cluster = this->readShort(this->socket);
 			let record->position = this->readLong(this->socket);
@@ -254,19 +266,21 @@ class RequestCommand extends OperationAbstract
 			let record->type = this->readByte(this->socket);
 			let record->cluster = this->readShort(this->socket);
 			let record->position = this->readLong(this->socket);
-			let record->rid = "#" . record->cluster . ":" . record->position;
+			// TODO: Find the right way to set the ID
+			//let record->rid = "#" . record->cluster . ":" . record->position;
 			let record->version = this->readInt(this->socket);
-			let record->content = this->readBytes(this->socket);
+			let record->raw = this->readBytes(this->socket);
 			if (this->parent->debug == true) {
 				syslog(LOG_DEBUG, __METHOD__ . " - @RID: " . record->rid);
-				syslog(LOG_DEBUG, __METHOD__ . " - Raw: " . record->content);
+				//syslog(LOG_DEBUG, __METHOD__ . " - Raw: " . record->raw);
 			}
-			let record->data = new OrientdbRecordData(record->content, this->_autoDecode, this->parent->debug);
-			let record->classname = record->data->getClassName();
-			if (this->parent->debug == true) {
+			// TODO:Refactor next lines
+			//let record->data = new OrientdbRecordData(record->raw, this->_autoDecode, this->parent->debug);
+			//let record->classname = record->data->getClassName();
+			//if (this->parent->debug == true) {
 				// all properties from 'record' are protected, the log will show empty
 				//syslog(LOG_DEBUG, __METHOD__ . " - data: " . json_encode(record));
-			}
+			//}
 		}
 		if (this->parent->debug == true) {
 			syslog(LOG_DEBUG, __METHOD__ . " - End" );

@@ -73,6 +73,9 @@ class OrientdbRecordDataDecoder
 	 */
 	public function getJson(asObject = false)
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ );
+		}
 		var response = [];
 		var e;
 		try {
@@ -99,6 +102,9 @@ class OrientdbRecordDataDecoder
 	 */
 	public function getMetadata() -> array
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ );
+		}
 		return this->metadata;
 	}
 
@@ -130,9 +136,9 @@ class OrientdbRecordDataDecoder
 
 		// RID link to string, RID linksets to string
 		let sTransformation = this->convertRidToString(sTransformation);
-		if (this->debug == true) {
-			syslog(LOG_DEBUG, __METHOD__ . " - data: " . sTransformation);
-		}
+		//if (this->debug == true) {
+			//syslog(LOG_DEBUG, __METHOD__ . " - data: " . sTransformation);
+		//}
 
 		let contentLength = strlen(sTransformation);
 		let this->element[] = self::PROPERTY;
@@ -787,6 +793,9 @@ class OrientdbRecordDataDecoder
 	 */
 	private function getClassname() -> string
 	{
+		if (this->debug == true) {
+			syslog(LOG_DEBUG, __METHOD__ );
+		}
 		return this->className;
 	}
 
