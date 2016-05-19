@@ -1,6 +1,9 @@
 vendor/
 php/
 .temp/
+.idea/
+ext/*
+!ext/modules/
 compile.log
 compile-errors.log
 composer.lock
